@@ -8,20 +8,22 @@ source /usr/local/osmosix/etc/.osmosix.sh
 export
 
 BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+export BASE_DIR
 
 # for augmentCsvList()
 source ${BASE_DIR}/../util/function.sh
-source ${BASE_DIR}/cfssl/generate.sh
 
 KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
 KUBERNETES_MGR_ADDRS="$CliqrTier_k8manager_PUBLIC_IP"
 ETCD_ADDRS="$CliqrTier_k8etcd_PUBLIC_IP"
 SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
-export KUBERNETES_PUBLIC_ADDR KUBERNETES_MGR_ADDRS ETCD_ADDRS
+SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
+export KUBERNETES_PUBLIC_ADDR KUBERNETES_MGR_ADDRS ETCD_ADDRS SERVICE_CLUSTER_IP_RANGE SERVICE_CLUSTER_ROUTER
 
 # Generate CA and TLS certificates
-export WD=${BASE_DIR}/cfssl
-generateCerts
+cd cfssl
+export WD=$(pwd)
+${WD}/generate.sh
 
 cp ${WD}/*.pem ~/.
 
