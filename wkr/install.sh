@@ -13,6 +13,8 @@ BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # for augmentCsvList() and retrieveFiles()
 source ${BASE_DIR}/../util/function.sh
 
+__CLUSTER_CIDR=${K8ClusterCIDR}
+
 # Fetch certificates, configs, and token from LB node home directory
 retrieveFiles "${CliqrTier_k8lb_PUBLIC_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
 
@@ -118,7 +120,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
 ExecStart=/usr/bin/kube-proxy \\
-  --cluster-cidr=10.200.0.0/16 \\
+  --cluster-cidr=${__CLUSTER_CIDR} \\
   --masquerade-all=true \\
   --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig \\
   --proxy-mode=iptables \\

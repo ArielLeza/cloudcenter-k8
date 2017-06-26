@@ -86,10 +86,25 @@ downloadFile() {
 }
 
 # Parse CloudCenter Userenv variables
-parseUserenv() {
+prepareEnvironment() {
   IFS=',' read -a wkr_ip <<< "$CliqrTier_k8worker_IP"
   IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
   IFS=',' read -a etcd_ip <<< "$CliqrTier_k8etcd_IP"
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
   IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
+
+  KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
+  KUBERNETES_MGR_ADDRS="$CliqrTier_k8manager_PUBLIC_IP"
+  ETCD_ADDRS="$CliqrTier_k8etcd_PUBLIC_IP"
+  SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
+  SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
+  export KUBERNETES_PUBLIC_ADDR KUBERNETES_MGR_ADDRS ETCD_ADDRS SERVICE_CLUSTER_IP_RANGE SERVICE_CLUSTER_ROUTER
+
+  IFS=',' read -a wkr_ip <<< "$CliqrTier_k8worker_IP"
+  IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
+  IFS=',' read -a etcd_ip <<< "$CliqrTier_k8etcd_IP"
+
+  __SERVICE_CIDR=${ServiceClusterIpRange}
+  __CLUSTER_CIDR=${K8ClusterCIDR}
+
 }

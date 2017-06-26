@@ -35,7 +35,7 @@ sudo mv kubectl /usr/local/bin
 
 
 # Manager Setup
-sudo mv ~/token.csv /var/lib/kubernetes/
+sudo cp ~/token.csv /var/lib/kubernetes/
 
 downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-apiserver
 downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-controller-manager
@@ -80,7 +80,7 @@ ExecStart=/usr/bin/kube-apiserver \\
   --kubelet-https=true \\
   --runtime-config=rbac.authorization.k8s.io/v1alpha1 \\
   --service-account-key-file=/var/lib/kubernetes/ca-key.pem \\
-  --service-cluster-ip-range=${__CLUSTER_CIDR} \\
+  --service-cluster-ip-range=${__SERVICE_CIDR} \\
   --service-node-port-range=30000-32767 \\
   --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
   --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
@@ -111,7 +111,7 @@ ExecStart=/usr/bin/kube-controller-manager \\
   --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
   --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
   --leader-elect=true \\
-  --master=http://${OSMOSIX_PRIVATE_IP} :8080 \\
+  --master=http://${OSMOSIX_PRIVATE_IP}:8080 \\
   --root-ca-file=/var/lib/kubernetes/ca.pem \\
   --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \\
   --service-cluster-ip-range=${__SERVICE_CIDR} \\
