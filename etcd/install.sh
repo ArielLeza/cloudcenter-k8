@@ -26,7 +26,13 @@ sudo mkdir -p /var/lib/etcd
 # Here we are taking public ip of all node in array. Current etcd cluster node
 # name is based on order in IP list, current etcd name is stored for later use.
 
-IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
+
+if [ -z $CliqrTier_k8etcd_PUBLIC_IP ]; then
+  IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_IP"
+else
+  IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
+fi
+#IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
 IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
 
 CLUSTER_LIST=""

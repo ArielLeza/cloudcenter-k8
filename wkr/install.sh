@@ -13,10 +13,15 @@ BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # for augmentCsvList() and retrieveFiles()
 source ${BASE_DIR}/../util/function.sh
 
+if [ -z $CliqrTier_k8lb_PUBLIC_IP ]; then
+  __K8_LB_IP="${CliqrTier_k8lb_IP}"
+else
+  __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
+fi
 __CLUSTER_CIDR=${K8ClusterCIDR}
 
 # Fetch certificates, configs, and token from LB node home directory
-retrieveFiles "${CliqrTier_k8lb_PUBLIC_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
+retrieveFiles "${__K8_LB_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
 
 sudo mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
 sudo mkdir -p /var/run/kubernetes
@@ -140,12 +145,12 @@ sudo systemctl start kube-proxy
 
 # Approve TLS Certificate requests
 
-if [ "$VM_NODE_INDEX" -eq "1" ]; then
-  sleep 60
-
-  IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
-  KUBECTL_GET_CSR=""
-  approveTlsCerts ${mgr_ip[0]} 1 1
-fi
+#if [ "$VM_NODE_INDEX" -eq "1" ]; then
+#  sleep 60
+#
+#  IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
+#  KUBECTL_GET_CSR=""
+#  approveTlsCerts ${mgr_ip[0]} 1 1
+#fi
 
 )>> /var/tmp/master.log 2>&1

@@ -19,6 +19,7 @@ export WD=$(pwd)
 sudo ${WD}/service install
 sudo cp etc/haproxy.cfg /etc/haproxy/haproxy.cfg
 sudo ${WD}/service configure
+sudo ${WD}/service start
 cd $CUR_DIR
 
 KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"

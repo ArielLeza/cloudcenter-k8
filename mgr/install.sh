@@ -13,9 +13,30 @@ BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source ${BASE_DIR}/../util/function.sh
 
 # Preprocess environment data
-IFS=',' read -a wkr_ip <<< "$CliqrTier_k8worker_IP"
-IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
-IFS=',' read -a etcd_ip <<< "$CliqrTier_k8etcd_IP"
+if [ -z $CliqrTier_k8lb_PUBLIC_IP ]; then
+  __K8_LB_IP="${CliqrTier_k8lb_IP}"
+else
+  __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
+fi
+if [ -z $CliqrTier_k8worker_PUBLIC_IP ]; then
+  __K8_WKR_IP="$CliqrTier_k8worker_IP"
+else
+  __K8_WKR_IP="$CliqrTier_k8worker_PUBLIC_IP"
+fi
+if [ -z $CliqrTier_k8manager_PUBLIC_IP ]; then
+  __K8_MGR_IP="$CliqrTier_k8manager_IP"
+else
+  __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
+fi
+if [ -z $CliqrTier_k8etcd_PUBLIC_IP ]; then
+  __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
+else
+  __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
+fi
+
+IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
+IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
+IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP="
 
 __SERVICE_CIDR=${ServiceClusterIpRange}
 __CLUSTER_CIDR=${K8ClusterCIDR}
@@ -46,7 +67,7 @@ sudo mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
 
 # Create kube-apiserver systemd file
 ETCD_SVRS=""
-augmentCsvList ETCD_SVRS "${CliqrTier_k8etcd_PUBLIC_IP}" "https://" ":2379"
+augmentCsvList ETCD_SVRS "${__K8_ETCD_IP}" "https://" ":2379"
 
 cat > kube-apiserver.service <<EOF
 [Unit]
@@ -180,7 +201,7 @@ if [ "$VM_NODE_INDEX" -eq "1" ]; then
   kubectl config set-cluster kubernetes-cloudcenter \
   --certificate-authority=ca.pem \
   --embed-certs=true \
-  --server=https://${CliqrTier_k8lb_PUBLIC_IP}:6443 \
+  --server=https://${__K8_ETCD_IP}:6443 \
   --kubeconfig=bootstrap.kubeconfig
 
 kubectl config set-credentials kubelet-bootstrap \
@@ -197,7 +218,7 @@ kubectl config use-context default --kubeconfig=bootstrap.kubeconfig
 kubectl config set-cluster kubernetes-cloudcenter \
   --certificate-authority=ca.pem \
   --embed-certs=true \
-  --server=https://${CliqrTier_k8lb_PUBLIC_IP}:6443 \
+  --server=https://${__K8_ETCD_IP}:6443 \
   --kubeconfig=kube-proxy.kubeconfig
 
 kubectl config set-credentials kube-proxy \
@@ -214,7 +235,7 @@ kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
 mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
 
-pushFiles "$CliqrTier_k8lb_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
+pushFiles "$__K8_ETCD_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
 fi
 
