@@ -44,11 +44,11 @@ __SERVICE_CIDR=${ServiceClusterIpRange}
 __CLUSTER_CIDR=${K8ClusterCIDR}
 
 # Fetch certificates and token from LB node home directory
-retrieveFiles "${CliqrTier_k8lb_PUBLIC_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem"
+retrieveFiles "${CliqrTier_k8lb_PUBLIC_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem "
 
 sudo mkdir -p /var/lib/kubernetes/
 cd ~
-sudo mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
+sudo cp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
 cd ${BASE_DIR}
 
 # Authentication Initialization

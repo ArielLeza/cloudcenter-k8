@@ -21,7 +21,7 @@ fi
 __CLUSTER_CIDR=${K8ClusterCIDR}
 
 # Fetch certificates, configs, and token from LB node home directory
-retrieveFiles "${__K8_LB_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
+retrieveFiles "${__K8_LB_IP}" ~ "token.csv ca.pem ca-key.pem admin.pem admin-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
 
 sudo mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
 sudo mkdir -p /var/run/kubernetes

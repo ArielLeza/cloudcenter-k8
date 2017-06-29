@@ -13,7 +13,7 @@ BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source ${BASE_DIR}/../util/function.sh
 
 # Fetch certificates
-retrieveFiles "$CliqrTier_k8lb_IP" ~ "ca.pem kubernetes-key.pem kubernetes.pem"
+retrieveFiles "$CliqrTier_k8lb_IP" ~ "ca.pem kubernetes-key.pem kubernetes.pem admin.pem admin-key.pem "
 
 downloadFile https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz
 tar xzf etcd-v3.1.4-linux-amd64.tar.gz
@@ -73,7 +73,7 @@ ExecStart=/usr/bin/etcd \\
   --peer-trusted-ca-file=/etc/etcd/ca.pem \\
   --peer-client-cert-auth \\
   --client-cert-auth \\
-  --initial-advertise-peer-urls https://${__K8_ETCD_PRIVATE}:2380 \\
+  --initial-advertise-peer-urls https://${__K8_ETCD_LOCAL}:2380 \\
   --listen-peer-urls https://${__K8_ETCD_LOCAL}:2380 \\
   --listen-client-urls https://${__K8_ETCD_LOCAL}:2379,http://127.0.0.1:2379 \\
   --advertise-client-urls https://${__K8_ETCD_LOCAL}:2379 \\
