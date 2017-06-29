@@ -30,11 +30,11 @@ sudo mkdir -p /var/lib/etcd
 if [ ! -z $CliqrTier_k8etcd_IP ]; then
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_IP"
   __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
-  __K8_ETCD_LOCAL="OSMOSIX_PRIVATE_IP"
+  __K8_ETCD_LOCAL="$OSMOSIX_PRIVATE_IP"
 else
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
   __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
-  __K8_ETCD_LOCAL="OSMOSIX_PUBLIC_IP"
+  __K8_ETCD_LOCAL="$OSMOSIX_PUBLIC_IP"
 fi
 #IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
 IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
