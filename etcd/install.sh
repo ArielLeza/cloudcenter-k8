@@ -29,8 +29,12 @@ sudo mkdir -p /var/lib/etcd
 
 if [ ! -z $CliqrTier_k8etcd_IP ]; then
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_IP"
+  __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
+  __K8_ETCD_LOCAL="OSMOSIX_PRIVATE_IP"
 else
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
+  __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
+  __K8_ETCD_LOCAL="OSMOSIX_PUBLIC_IP"
 fi
 #IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
 IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
@@ -69,10 +73,10 @@ ExecStart=/usr/bin/etcd \\
   --peer-trusted-ca-file=/etc/etcd/ca.pem \\
   --peer-client-cert-auth \\
   --client-cert-auth \\
-  --initial-advertise-peer-urls https://${OSMOSIX_PUBLIC_IP}:2380 \\
-  --listen-peer-urls https://${OSMOSIX_PUBLIC_IP}:2380 \\
-  --listen-client-urls https://${OSMOSIX_PUBLIC_IP}:2379,http://127.0.0.1:2379 \\
-  --advertise-client-urls https://${OSMOSIX_PUBLIC_IP}:2379 \\
+  --initial-advertise-peer-urls https://${__K8_ETCD_PRIVATE}:2380 \\
+  --listen-peer-urls https://${__K8_ETCD_LOCAL}:2380 \\
+  --listen-client-urls https://${__K8_ETCD_LOCAL}:2379,http://127.0.0.1:2379 \\
+  --advertise-client-urls https://${__K8_ETCD_LOCAL}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
   --initial-cluster ${CLUSTER_LIST} \\
   --initial-cluster-state new \\

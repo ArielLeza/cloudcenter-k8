@@ -25,8 +25,10 @@ else
 fi
 if [ ! -z $CliqrTier_k8manager_IP ]; then
   __K8_MGR_IP="$CliqrTier_k8manager_IP"
+  __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
 else
   __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
+  __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
 fi
 if [ ! -z $CliqrTier_k8etcd_IP ]; then
   __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
@@ -77,7 +79,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 [Service]
 ExecStart=/usr/bin/kube-apiserver \\
   --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
-  --advertise-address=${OSMOSIX_PRIVATE_IP} \\
+  --advertise-address=${__K8_MGR_LOCAL} \\
   --allow-privileged=true \\
   --apiserver-count=3 \\
   --audit-log-maxage=30 \\
@@ -156,7 +158,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 [Service]
 ExecStart=/usr/bin/kube-scheduler \\
   --leader-elect=true \\
-  --master=http://${OSMOSIX_PRIVATE_IP}:8080 \\
+  --master=http://${__K8_MGR_LOCAL}:8080 \\
   --v=2
 Restart=on-failure
 RestartSec=5
