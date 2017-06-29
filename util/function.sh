@@ -1,3 +1,4 @@
+
 # Reformat simple comma separated list of values for each
 # list item to be surrounded by prepend and append values
 augmentCsvList() {
