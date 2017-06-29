@@ -13,7 +13,7 @@ BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # for augmentCsvList() and retrieveFiles()
 source ${BASE_DIR}/../util/function.sh
 
-if [ -z $CliqrTier_k8lb_PUBLIC_IP ]; then
+if [ ! -z $CliqrTier_k8lb_IP ]; then
   __K8_LB_IP="${CliqrTier_k8lb_IP}"
 else
   __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"

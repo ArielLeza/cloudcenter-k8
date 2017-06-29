@@ -13,22 +13,22 @@ BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source ${BASE_DIR}/../util/function.sh
 
 # Preprocess environment data
-if [ -z $CliqrTier_k8lb_PUBLIC_IP ]; then
+if [ ! -z $CliqrTier_k8lb_IP ]; then
   __K8_LB_IP="${CliqrTier_k8lb_IP}"
 else
   __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
 fi
-if [ -z $CliqrTier_k8worker_PUBLIC_IP ]; then
+if [ ! -z $CliqrTier_k8worker_IP ]; then
   __K8_WKR_IP="$CliqrTier_k8worker_IP"
 else
   __K8_WKR_IP="$CliqrTier_k8worker_PUBLIC_IP"
 fi
-if [ -z $CliqrTier_k8manager_PUBLIC_IP ]; then
+if [ ! -z $CliqrTier_k8manager_IP ]; then
   __K8_MGR_IP="$CliqrTier_k8manager_IP"
 else
   __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
 fi
-if [ -z $CliqrTier_k8etcd_PUBLIC_IP ]; then
+if [ ! -z $CliqrTier_k8etcd_IP ]; then
   __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
 else
   __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"

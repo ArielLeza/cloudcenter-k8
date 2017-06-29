@@ -27,7 +27,7 @@ sudo mkdir -p /var/lib/etcd
 # name is based on order in IP list, current etcd name is stored for later use.
 
 
-if [ -z $CliqrTier_k8etcd_PUBLIC_IP ]; then
+if [ ! -z $CliqrTier_k8etcd_IP ]; then
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_IP"
 else
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
