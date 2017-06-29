@@ -241,4 +241,24 @@ pushFiles "$__K8_LB_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
 fi
 
+cat > kubectl-cfg.sh <<EOF
+K8_PUBIP=$__K8_LB_IP
+
+kubectl config set-cluster kubernetes-cc \
+  --certificate-authority=ca.pem \
+  --embed-certs=true \
+  --server=https://${K8_PUBIP}:6443
+
+kubectl config set-credentials admin \
+  --client-certificate=admin.pem \
+  --client-key=admin-key.pem
+
+kubectl config set-context kubernetes-cc \
+  --cluster=kubernetes-cloudcenter \
+  --user=admin
+
+kubectl config use-context kubernetes-cc
+EOF
+
+
 )>> /var/tmp/master.log 2>&1
