@@ -241,7 +241,7 @@ pushFiles "$__K8_LB_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
 fi
 
-cat > kubectl-cfg.sh <<EOF
+cat > ~/kubectl-cfg.sh <<EOF
 K8_PUBIP=$__K8_LB_IP
 
 kubectl config set-cluster kubernetes-cc \
