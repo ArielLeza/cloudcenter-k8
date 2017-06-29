@@ -65,7 +65,7 @@ approveTlsCerts() {
   local __timeout=$3
 
   local __count=0
-  while [ ${__count} -lt ${__timeout}]; do
+  while [ ${__count} -lt ${__timeout} ]; do
     __cmdoutput=""
     runRemoteCommand ${__target} __cmdoutput 'kubectl get csr'
 

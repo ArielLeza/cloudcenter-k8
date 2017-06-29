@@ -13,6 +13,14 @@ export BASE_DIR
 # for augmentCsvList()
 source ${BASE_DIR}/../util/function.sh
 
+CUR_DIR=$(pwd)
+cd haproxy
+export WD=$(pwd)
+sudo ${WD}/service install
+sudo cp etc/haproxy.cfg /etc/haproxy/haproxy.cfg
+sudo ${WD}/service configure
+cd $CUR_DIR
+
 KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
 KUBERNETES_MGR_ADDRS="$CliqrTier_k8manager_PUBLIC_IP"
 ETCD_ADDRS="$CliqrTier_k8etcd_PUBLIC_IP"
