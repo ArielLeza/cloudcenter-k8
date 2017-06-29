@@ -235,7 +235,7 @@ kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
 mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
 
-pushFiles "$__K8_ETCD_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
+pushFiles "$__K8_LB_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
 fi
 
