@@ -22,9 +22,23 @@ sudo ${WD}/service configure
 sudo ${WD}/service start
 cd $CUR_DIR
 
+# Swap to unified namespace
+if [ ! -z $CliqrTier_k8manager_IP ]; then
+  __K8_MGR_IP="$CliqrTier_k8manager_IP"
+  __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
+else
+  __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
+  __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
+fi
+if [ ! -z $CliqrTier_k8etcd_IP ]; then
+  __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
+else
+  __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
+fi
+
 KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
-KUBERNETES_MGR_ADDRS="$CliqrTier_k8manager_PUBLIC_IP"
-ETCD_ADDRS="$CliqrTier_k8etcd_PUBLIC_IP"
+KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
+ETCD_ADDRS="$__K8_ETCD_IP"
 SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
 SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
 export KUBERNETES_PUBLIC_ADDR KUBERNETES_MGR_ADDRS ETCD_ADDRS SERVICE_CLUSTER_IP_RANGE SERVICE_CLUSTER_ROUTER

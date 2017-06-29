@@ -26,6 +26,7 @@ ${WD}/cfssl gencert \
   -profile=kubernetes \
   kube-proxy-csr.json | ${WD}/cfssljson -bare kube-proxy
 
+# Swap to unified namespace
 augmentCsvList __K8_ADDRS "$KUBERNETES_MGR_ADDRS" "\"" "\""
 augmentCsvList __ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
 augmentCsvList __K8_PUBLIC_ADDR "$KUBERNETES_PUBLIC_ADDR" "\"" "\""

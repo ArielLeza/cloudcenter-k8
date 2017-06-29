@@ -26,7 +26,7 @@ sudo mkdir -p /var/lib/etcd
 # Here we are taking public ip of all node in array. Current etcd cluster node
 # name is based on order in IP list, current etcd name is stored for later use.
 
-
+# Swap to unified namespace
 if [ ! -z $CliqrTier_k8etcd_IP ]; then
   IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_IP"
   __K8_ETCD_IP="$CliqrTier_k8etcd_IP"

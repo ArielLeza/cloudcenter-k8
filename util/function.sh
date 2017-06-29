@@ -88,22 +88,43 @@ downloadFile() {
 
 # Parse CloudCenter Userenv variables
 prepareEnvironment() {
-  IFS=',' read -a wkr_ip <<< "$CliqrTier_k8worker_IP"
-  IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
-  IFS=',' read -a etcd_ip <<< "$CliqrTier_k8etcd_IP"
-  IFS=',' read -a nodes <<< "$CliqrTier_k8etcd_PUBLIC_IP"
+
+  # Preprocess environment data
+  if [ ! -z $CliqrTier_k8lb_IP ]; then
+    __K8_LB_IP="${CliqrTier_k8lb_IP}"
+  else
+    __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
+  fi
+  if [ ! -z $CliqrTier_k8worker_IP ]; then
+    __K8_WKR_IP="$CliqrTier_k8worker_IP"
+  else
+    __K8_WKR_IP="$CliqrTier_k8worker_PUBLIC_IP"
+  fi
+  if [ ! -z $CliqrTier_k8manager_IP ]; then
+    __K8_MGR_IP="$CliqrTier_k8manager_IP"
+    __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
+  else
+    __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
+    __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
+  fi
+  if [ ! -z $CliqrTier_k8etcd_IP ]; then
+    __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
+  else
+    __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
+  fi
+
+  IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
+  IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
+  IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP"
+  IFS=',' read -a nodes <<< "$__K8_ETCD_IP"
   IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
 
   KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
-  KUBERNETES_MGR_ADDRS="$CliqrTier_k8manager_PUBLIC_IP"
-  ETCD_ADDRS="$CliqrTier_k8etcd_PUBLIC_IP"
+  KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
+  ETCD_ADDRS="$__K8_ETCD_IP"
   SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
   SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
   export KUBERNETES_PUBLIC_ADDR KUBERNETES_MGR_ADDRS ETCD_ADDRS SERVICE_CLUSTER_IP_RANGE SERVICE_CLUSTER_ROUTER
-
-  IFS=',' read -a wkr_ip <<< "$CliqrTier_k8worker_IP"
-  IFS=',' read -a mgr_ip <<< "$CliqrTier_k8manager_IP"
-  IFS=',' read -a etcd_ip <<< "$CliqrTier_k8etcd_IP"
 
   __SERVICE_CIDR=${ServiceClusterIpRange}
   __CLUSTER_CIDR=${K8ClusterCIDR}
