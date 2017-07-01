@@ -195,13 +195,13 @@ kubectl create clusterrolebinding kubelet-bootstrap \
   --user=kubelet-bootstrap
 
 # CREATE BOOTSTRAP AUTHENTICATION (ON MANAGER0 ONLY)
-# https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/03-auth-configs.md
+cd ~
 if [ "$VM_NODE_INDEX" -eq "1" ]; then
   BOOTSTRAP_TOKEN_CSV=$(cat ~/token.csv)
   IFS=',' read -a TOKEN <<< "$BOOTSTRAP_TOKEN_CSV"
   BOOTSTRAP_TOKEN=${TOKEN[0]}
 
-  kubectl config set-cluster kubernetes-cloudcenter \
+  kubectl config set-cluster kubernetes-cc \
   --certificate-authority=ca.pem \
   --embed-certs=true \
   --server=https://${__K8_ETCD_IP}:6443 \
@@ -212,13 +212,13 @@ kubectl config set-credentials kubelet-bootstrap \
   --kubeconfig=bootstrap.kubeconfig
 
 kubectl config set-context default \
-  --cluster=kubernetes-cloudcenter \
+  --cluster=kubernetes-cc \
   --user=kubelet-bootstrap \
   --kubeconfig=bootstrap.kubeconfig
 
 kubectl config use-context default --kubeconfig=bootstrap.kubeconfig
 
-kubectl config set-cluster kubernetes-cloudcenter \
+kubectl config set-cluster kubernetes-cc \
   --certificate-authority=ca.pem \
   --embed-certs=true \
   --server=https://${__K8_ETCD_IP}:6443 \
@@ -231,7 +231,7 @@ kubectl config set-credentials kube-proxy \
   --kubeconfig=kube-proxy.kubeconfig
 
 kubectl config set-context default \
-  --cluster=kubernetes-cloudcenter \
+  --cluster=kubernetes-cc \
   --user=kube-proxy \
   --kubeconfig=kube-proxy.kubeconfig
 kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
@@ -255,11 +255,12 @@ kubectl config set-credentials admin \
   --client-key=admin-key.pem
 
 kubectl config set-context kubernetes-cc \
-  --cluster=kubernetes-cloudcenter \
+  --cluster=kubernetes-cc \
   --user=admin
 
 kubectl config use-context kubernetes-cc
 EOF
 
+cd ${BASE_DIR}
 
 )>> /var/tmp/master.log 2>&1
