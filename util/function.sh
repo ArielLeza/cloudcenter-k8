@@ -135,7 +135,5 @@ prepareEnvironment() {
 log() {
 	if [ -n "$USE_PROFILE_LOG"  -a "$USE_PROFILE_LOG" == "true" ];then
 	    echo "$*"
-#	else
-#		logger -t "OSMOSIX" "[$SVCNAME] $*"
 	fi
 }
