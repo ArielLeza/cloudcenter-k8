@@ -1,82 +1,71 @@
 #!/bin/bash
 
-# for augmentCsvList()
-source ${BASE_DIR}/../util/function.sh
-
 set -x
 
-if [ -z "${WD}" ]; then
-  WD="."
-  set -x
-fi
+generate() {
 
-${WD}/cfssl gencert -initca ca-csr.json | ${WD}/cfssljson -bare ca
+  if [ -z "${WD}" ]; then
+    WD="."
+    set -x
+  fi
 
-${WD}/cfssl gencert \
-  -ca=ca.pem \
-  -ca-key=ca-key.pem \
-  -config=ca-config.json \
-  -profile=kubernetes \
-  admin-csr.json | ${WD}/cfssljson -bare admin
+  ${WD}/cfssl gencert -initca ca-csr.json | ${WD}/cfssljson -bare ca
 
-${WD}/cfssl gencert \
-  -ca=ca.pem \
-  -ca-key=ca-key.pem \
-  -config=ca-config.json \
-  -profile=kubernetes \
-  kube-proxy-csr.json | ${WD}/cfssljson -bare kube-proxy
+  ${WD}/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+    admin-csr.json | ${WD}/cfssljson -bare admin
 
-# Swap to unified namespace
-augmentCsvList __K8_ADDRS "$KUBERNETES_MGR_ADDRS" "\"" "\""
-augmentCsvList __ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
-augmentCsvList __K8_PUBLIC_ADDR "$KUBERNETES_PUBLIC_ADDR" "\"" "\""
-augmentCsvList __SERVICE_RTR "$SERVICE_CLUSTER_ROUTER" "\"" "\""
+  ${WD}/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+    kube-proxy-csr.json | ${WD}/cfssljson -bare kube-proxy
 
-if [ -n "$__K8_ADDRS" ]; then
-  __K8_ADDRS="${__K8_ADDRS},"
-fi
-if [ -n "$__ETCD_ADDRS" ]; then
-  __ETCD_ADDRS="${__ETCD_ADDRS},"
-fi
-if [ -n "$__K8_PUBLIC_ADDR" ]; then
-  __K8_PUBLIC_ADDR="${__K8_PUBLIC_ADDR},"
-fi
-if [ -n "${__SERVICE_RTR}" ]; then
-  __SERVICE_RTR="${__SERVICE_RTR},"
-fi
+  # Swap to unified namespace
+  set CSR_K8_ADDRS CSR_ETCD_ADDRS CSR_K8_PUBLIC_ADDR CSR_SERVICE_RTR
+  augmentCsvList CSR_K8_ADDRS "$KUBERNETES_MGR_ADDRS" "\"" "\""
+  augmentCsvList CSR_ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
+  augmentCsvList CSR_K8_PUBLIC_ADDR "$KUBERNETES_PUBLIC_ADDR" "\"" "\""
+  augmentCsvList CSR_SERVICE_RTR "$SERVICE_CLUSTER_ROUTER" "\"" "\""
 
 
-cat > kubernetes-csr.json <<EOF
-{
-  "CN": "kubernetes",
-  "hosts": [
-    ${__K8_ADDRS}
-    ${__ETCD_ADDRS}
-    ${__K8_PUBLIC_ADDR}
-    ${__SERVICE_RTR}
-    "127.0.0.1",
-    "kubernetes.default"
-  ],
-  "key": {
-    "algo": "rsa",
-    "size": 2048
-  },
-  "names": [
-    {
-      "C": "US",
-      "L": "Las Vegas",
-      "O": "Kubernetes",
-      "OU": "Cluster",
-      "ST": "Nevada"
-    }
-  ]
-}
+  cat > kubernetes-csr.json <<EOF
+  {
+    "CN": "kubernetes",
+    "hosts": [
+      ${CSR_K8_ADDRS}
+      ${CSR_ETCD_ADDRS}
+      ${CSR_K8_PUBLIC_ADDR}
+      ${CSR_SERVICE_RTR}
+      "127.0.0.1",
+      "kubernetes.default"
+    ],
+    "key": {
+      "algo": "rsa",
+      "size": 2048
+    },
+    "names": [
+      {
+        "C": "US",
+        "L": "Las Vegas",
+        "O": "Kubernetes",
+        "OU": "Cluster",
+        "ST": "Nevada"
+      }
+    ]
+  }
 EOF
 
 
-${WD}/cfssl gencert \
-  -ca=ca.pem \
-  -ca-key=ca-key.pem \
-  -config=ca-config.json \
-  -profile=kubernetes \
-  kubernetes-csr.json | ${WD}/cfssljson -bare kubernetes
+  ${WD}/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+    kubernetes-csr.json | ${WD}/cfssljson -bare kubernetes
+
+}

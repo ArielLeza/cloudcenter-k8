@@ -21,7 +21,7 @@ export
 
 if [ -f ${BASE_DIR}/${TIER}/${TIER}.sh ]; then
   log "[$CMD] $TIER"
-  source ${BASE_DIR}/${TIER}/${TIER}.sh ${CMD}
+  source ${BASE_DIR}/${TIER}/${TIER}.sh
 else
   log "[${TIER} ${CMD}] Error: ${BASE_DIR}/${TIER}/${TIER}.sh not found"
   exit 127
