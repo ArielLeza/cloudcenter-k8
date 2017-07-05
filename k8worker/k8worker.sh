@@ -153,7 +153,7 @@ EOF
 }
 
 # Action selection
-
+local CMD=$1
 case $CMD in
 	install)
 		log "[INSTALL] Installing $cliqrAppTierName"

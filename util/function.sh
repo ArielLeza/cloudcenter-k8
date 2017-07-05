@@ -133,9 +133,9 @@ prepareEnvironment() {
 
 # Use agent logging facility
 log() {
-	if [ -n "$USE_SERVICE_LOG"  -a "$USE_SERVICE_LOG" == "true" ];then
+	if [ -n "$USE_PROFILE_LOG"  -a "$USE_PROFILE_LOG" == "true" ];then
 	    echo "$*"
-	else
-		logger -t "OSMOSIX" "[$SVCNAME] $*"
+#	else
+#		logger -t "OSMOSIX" "[$SVCNAME] $*"
 	fi
 }
