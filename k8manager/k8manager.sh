@@ -32,8 +32,8 @@ install() {
   sudo mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
 
   # Create kube-apiserver systemd file
-  ETCD_SVRS=""
-  augmentCsvList ETCD_SVRS "${__K8_ETCD_IP}" "https://" ":2379"
+  local ETCD_SVR_LIST=""
+  augmentCsvList ETCD_SVR_LIST "${ETCD_ADDRS}" "https://" ":2379"
 
   cat > kube-apiserver.service <<EOF
   [Unit]
@@ -57,7 +57,7 @@ install() {
     --etcd-cafile=/var/lib/kubernetes/ca.pem \\
     --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
     --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
-    --etcd-servers=${ETCD_SVRS} \\
+    --etcd-servers=${ETCD_SVR_LIST} \\
     --event-ttl=1h \\
     --experimental-bootstrap-token-auth \\
     --insecure-bind-address=0.0.0.0 \\
@@ -162,10 +162,10 @@ EOF
     IFS=',' read -a TOKEN <<< "$BOOTSTRAP_TOKEN_CSV"
     BOOTSTRAP_TOKEN=${TOKEN[0]}
 
-    kubectl config set-cluster kubernetes-cc \
+    kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-    --server=https://${__K8_ETCD_IP}:6443 \
+#    --server=https://${__K8_ETCD_IP}:6443 \
     --kubeconfig=bootstrap.kubeconfig
 
   kubectl config set-credentials kubelet-bootstrap \
@@ -173,16 +173,16 @@ EOF
     --kubeconfig=bootstrap.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-cc \
+    --cluster=${CLUSTER_NAME} \
     --user=kubelet-bootstrap \
     --kubeconfig=bootstrap.kubeconfig
 
   kubectl config use-context default --kubeconfig=bootstrap.kubeconfig
 
-  kubectl config set-cluster kubernetes-cc \
+  kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-    --server=https://${__K8_ETCD_IP}:6443 \
+#    --server=https://${ETCD_ADDRS}:6443 \
     --kubeconfig=kube-proxy.kubeconfig
 
   kubectl config set-credentials kube-proxy \
@@ -192,21 +192,21 @@ EOF
     --kubeconfig=kube-proxy.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-cc \
+    --cluster=${CLUSTER_NAME} \
     --user=kube-proxy \
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
   mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
 
-  pushFiles "$__K8_LB_IP" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
+  pushFiles "$KUBERNETES_PUBLIC_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
   fi
 
   cat > ~/kubectl-cfg.sh <<EOF
   K8_PUBIP=$__K8_LB_IP
 
-  kubectl config set-cluster kubernetes-cc \
+  kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://${K8_PUBIP}:6443
@@ -215,11 +215,11 @@ EOF
     --client-certificate=admin.pem \
     --client-key=admin-key.pem
 
-  kubectl config set-context kubernetes-cc \
+  kubectl config set-context ${CLUSTER_NAME} \
     --cluster=kubernetes-cc \
     --user=admin
 
-  kubectl config use-context kubernetes-cc
+  kubectl config use-context ${CLUSTER_NAME}
 EOF
 
   cd ${BASE_DIR}

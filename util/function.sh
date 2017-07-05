@@ -91,26 +91,26 @@ prepareEnvironment() {
 
   # Preprocess environment data
   if [ ! -z $CliqrTier_k8lb_IP ]; then
-    __K8_LB_IP="${CliqrTier_k8lb_IP}"
+    local __K8_LB_IP="${CliqrTier_k8lb_IP}"
   else
-    __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
+    local __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
   fi
   if [ ! -z $CliqrTier_k8worker_IP ]; then
-    __K8_WKR_IP="$CliqrTier_k8worker_IP"
+    local __K8_WKR_IP="$CliqrTier_k8worker_IP"
   else
-    __K8_WKR_IP="$CliqrTier_k8worker_PUBLIC_IP"
+    local __K8_WKR_IP="$CliqrTier_k8worker_PUBLIC_IP"
   fi
   if [ ! -z $CliqrTier_k8manager_IP ]; then
-    __K8_MGR_IP="$CliqrTier_k8manager_IP"
-    __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
+    local __K8_MGR_IP="$CliqrTier_k8manager_IP"
+    local __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
   else
-    __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
-    __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
+    local __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
+    local __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
   fi
   if [ ! -z $CliqrTier_k8etcd_IP ]; then
-    __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
+    local __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
   else
-    __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
+    local __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
   fi
 
   IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
@@ -120,7 +120,7 @@ prepareEnvironment() {
   IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
   #IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
 
-  KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
+  KUBERNETES_PUBLIC_ADDR="$__K8_LB_IP"
   KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
   ETCD_ADDRS="$__K8_ETCD_IP"
   SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
@@ -128,6 +128,7 @@ prepareEnvironment() {
 
   SERVICE_CIDR=${ServiceClusterIpRange}
   CLUSTER_CIDR=${K8ClusterCIDR}
+  CLUSTER_NAME=${ClusterName}
 
   export
 
