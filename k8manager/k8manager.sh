@@ -7,38 +7,6 @@ install() {
   cd ${cliqrAppTierName}
   export WD=$(pwd)
 
-  # Swap to unified namespace
-  # Preprocess environment data
-  if [ ! -z $CliqrTier_k8lb_IP ]; then
-    __K8_LB_IP="${CliqrTier_k8lb_IP}"
-  else
-    __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
-  fi
-  if [ ! -z $CliqrTier_k8worker_IP ]; then
-    __K8_WKR_IP="$CliqrTier_k8worker_IP"
-  else
-    __K8_WKR_IP="$CliqrTier_k8worker_PUBLIC_IP"
-  fi
-  if [ ! -z $CliqrTier_k8manager_IP ]; then
-    __K8_MGR_IP="$CliqrTier_k8manager_IP"
-    __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
-  else
-    __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
-    __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
-  fi
-  if [ ! -z $CliqrTier_k8etcd_IP ]; then
-    __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
-  else
-    __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
-  fi
-
-  IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
-  IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
-  IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP="
-
-  __SERVICE_CIDR=${ServiceClusterIpRange}
-  __CLUSTER_CIDR=${K8ClusterCIDR}
-
   # Fetch certificates and token from LB node home directory
   retrieveFiles "${CliqrTier_k8lb_PUBLIC_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem "
 
@@ -99,7 +67,7 @@ install() {
     --kubelet-https=true \\
     --runtime-config=rbac.authorization.k8s.io/v1alpha1 \\
     --service-account-key-file=/var/lib/kubernetes/ca-key.pem \\
-    --service-cluster-ip-range=${__SERVICE_CIDR} \\
+    --service-cluster-ip-range=${SERVICE_CIDR} \\
     --service-node-port-range=30000-32767 \\
     --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
     --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
@@ -125,7 +93,7 @@ EOF
   ExecStart=/usr/bin/kube-controller-manager \\
     --address=0.0.0.0 \\
     --allocate-node-cidrs=true \\
-    --cluster-cidr=${__CLUSTER_CIDR} \\
+    --cluster-cidr=${CLUSTER_CIDR} \\
     --cluster-name=kubernetes \\
     --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
     --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
@@ -133,7 +101,7 @@ EOF
     --master=http://${OSMOSIX_PRIVATE_IP}:8080 \\
     --root-ca-file=/var/lib/kubernetes/ca.pem \\
     --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \\
-    --service-cluster-ip-range=${__SERVICE_CIDR} \\
+    --service-cluster-ip-range=${SERVICE_CIDR} \\
     --v=2
   Restart=on-failure
   RestartSec=5

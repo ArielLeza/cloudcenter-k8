@@ -7,14 +7,6 @@ install() {
   cd ${cliqrAppTierName}
   export WD=$(pwd)
 
-  # Swap to unified namespace
-  if [ ! -z $CliqrTier_k8lb_IP ]; then
-    __K8_LB_IP="${CliqrTier_k8lb_IP}"
-  else
-    __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
-  fi
-  __CLUSTER_CIDR=${K8ClusterCIDR}
-
   # Fetch certificates, configs, and token from LB node home directory
   retrieveFiles "${__K8_LB_IP}" ~ "token.csv ca.pem ca-key.pem admin.pem admin-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
 

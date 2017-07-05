@@ -37,7 +37,7 @@ retrieveFiles() {
   done
 }
 
-# Push files from to other nodes
+# CLUSTER_CIDRm to other nodes
 pushFiles() {
   local __targets=$1
   local __path=$2
@@ -116,18 +116,20 @@ prepareEnvironment() {
   IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
   IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
   IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP"
-  IFS=',' read -a nodes <<< "$__K8_ETCD_IP"
-  IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
+  #IFS=',' read -a nodes <<< "$__K8_ETCD_IP"
+  IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
+  #IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
 
   KUBERNETES_PUBLIC_ADDR="$CliqrTier_k8lb_PUBLIC_IP"
   KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
   ETCD_ADDRS="$__K8_ETCD_IP"
   SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
   SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
-  export KUBERNETES_PUBLIC_ADDR KUBERNETES_MGR_ADDRS ETCD_ADDRS SERVICE_CLUSTER_IP_RANGE SERVICE_CLUSTER_ROUTER
 
-  __SERVICE_CIDR=${ServiceClusterIpRange}
-  __CLUSTER_CIDR=${K8ClusterCIDR}
+  SERVICE_CIDR=${ServiceClusterIpRange}
+  CLUSTER_CIDR=${K8ClusterCIDR}
+
+  export
 
 }
 
