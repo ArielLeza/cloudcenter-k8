@@ -9,7 +9,7 @@ source /usr/local/osmosix/etc/.osmosix.sh
 BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 source ${BASE_DIR}/util/function.sh
-USE_PROFILE_LOG == "true"
+USE_PROFILE_LOG="true"
 
 prepareEnvironment
 
@@ -21,23 +21,18 @@ export
 
 if [ -f ${BASE_DIR}/${TIER}/${TIER}.sh ]; then
   log "[$CMD] $TIER"
-  ${BASE_DIR}/${TIER}/${TIER}.sh ${CMD}
+  source ${BASE_DIR}/${TIER}/${TIER}.sh ${CMD}
 else
-  log "[$CMD] Error: ${BASE_DIR}/${TIER}/${TIER}.sh not found"
+  log "[${TIER} ${CMD}] Error: ${BASE_DIR}/${TIER}/${TIER}.sh not found"
+  exit 127
 fi
 
 # Action selection
-local CMD=$1
+CMD=$1
 case $CMD in
 	install)
-    if [ -f ${BASE_DIR}/${TIER}/${TIER}.sh ]; then
-      source ${BASE_DIR}/${TIER}/${TIER}.sh
       log "[INSTALL ${TIER}] Installing ${TIER}"
-      ${BASE_DIR}/${TIER}/${TIER}.sh install
-    else
-      log "[INSTALL ${TIER}] Error: ${BASE_DIR}/${TIER}/${TIER}.sh not found"
-      exit 127
-    fi
+      install
 		;;
 	deploy)
 		;;
