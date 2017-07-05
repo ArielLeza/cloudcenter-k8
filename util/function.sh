@@ -130,3 +130,12 @@ prepareEnvironment() {
   __CLUSTER_CIDR=${K8ClusterCIDR}
 
 }
+
+# Use agent logging facility
+log() {
+	if [ -n "$USE_SERVICE_LOG"  -a "$USE_SERVICE_LOG" == "true" ];then
+	    echo "$*"
+	else
+		logger -t "OSMOSIX" "[$SVCNAME] $*"
+	fi
+}
