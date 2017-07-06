@@ -118,13 +118,6 @@ prepareEnvironment() {
     local __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
   fi
 
-  # Set local IP address variables for ETCD and MGR Tiers
-  if [ "$TIER" -eq "k8etcd" ]; then
-    ETCD_LOCAL_ADDR="$OSMOSIX_PRIVATE_IP"
-  elif [ "$TIER" -eq "k8manager" ]; then
-    MGR_LOCAL_ADDR="$OSMOSIX_PRIVATE_IP"
-  fi
-
   # Create IP addr and name arrays
   IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
   IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
@@ -150,6 +143,10 @@ prepareEnvironment() {
   CLUSTER_NAME="${ClusterName}"
 
   export
+
+  if [ ! -z "$DEBUG" ]; then
+    env
+  fi
 
 }
 

@@ -7,6 +7,9 @@ install() {
   cd ${TIER}
   export WD=$(pwd)
 
+  # Verify needed data
+  echo LB_ADDR=$LB_ADDR ETCD_LOCAL_ADDR=$ETCD_LOCAL_ADDR
+
   # Fetch certificates
   retrieveFiles "$LB_ADDR" ~ "ca.pem kubernetes-key.pem kubernetes.pem admin.pem admin-key.pem "
 
@@ -55,10 +58,10 @@ install() {
     --peer-trusted-ca-file=/etc/etcd/ca.pem \\
     --peer-client-cert-auth \\
     --client-cert-auth \\
-    --initial-advertise-peer-urls https://${ETCD_LOCAL_ADDR}:2380 \\
-    --listen-peer-urls https://${ETCD_LOCAL_ADDR}:2380 \\
-    --listen-client-urls https://${ETCD_LOCAL_ADDR}:2379,http://127.0.0.1:2379 \\
-    --advertise-client-urls https://${ETCD_LOCAL_ADDR}:2379 \\
+    --initial-advertise-peer-urls https://${OSMOSIX_PRIVATE_IP}:2380 \\
+    --listen-peer-urls https://${OSMOSIX_PRIVATE_IP}:2380 \\
+    --listen-client-urls https://${OSMOSIX_PRIVATE_IP}:2379,http://127.0.0.1:2379 \\
+    --advertise-client-urls https://${OSMOSIX_PRIVATE_IP}:2379 \\
     --initial-cluster-token etcd-cluster-0 \\
     --initial-cluster ${__CLUSTER_LIST} \\
     --initial-cluster-state new \\

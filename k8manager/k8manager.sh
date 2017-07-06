@@ -43,7 +43,7 @@ install() {
   [Service]
   ExecStart=/usr/bin/kube-apiserver \\
     --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
-    --advertise-address=${MGR_LOCAL_ADDR} \\
+    --advertise-address=${OSMOSIX_PRIVATE_IP} \\
     --allow-privileged=true \\
     --apiserver-count=3 \\
     --audit-log-maxage=30 \\
@@ -122,7 +122,7 @@ EOF
   [Service]
   ExecStart=/usr/bin/kube-scheduler \\
     --leader-elect=true \\
-    --master=http://${MGR_LOCAL_ADDR}:8080 \\
+    --master=http://${OSMOSIX_PRIVATE_IP}:8080 \\
     --v=2
   Restart=on-failure
   RestartSec=5
