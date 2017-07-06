@@ -204,7 +204,7 @@ EOF
   fi
 
   cat > ~/kubectl-cfg.sh <<EOF
-  K8_PUBIP=$__K8_LB_IP
+  K8_PUBIP=${K8_PUBLIC_ADDR}
 
   kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
@@ -216,7 +216,7 @@ EOF
     --client-key=admin-key.pem
 
   kubectl config set-context ${CLUSTER_NAME} \
-    --cluster=kubernetes-cc \
+    --cluster=${CLUSTER_NAME} \
     --user=admin
 
   kubectl config use-context ${CLUSTER_NAME}

@@ -76,8 +76,9 @@ installHaproxy() {
 }
 
 generateHAProxyConfig() {
-	HAPROXY_CONFIG="/etc/$SVCNAME/haproxy.cfg"
-	cp $SVCHOME/etc/haproxy.cfg $HAPROXY_CONFIG
+	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg"
+  HEALTH_CHECK=" port 8080"
+	cp ${WD}/etc/haproxy.cfg $HAPROXY_CONFIG
 	chmod 0644 $HAPROXY_CONFIG
 
 	if ([ $os == "CentOS" ] || [ $os == "RHEL" ])
@@ -106,7 +107,7 @@ generateHAProxyConfig() {
 		do
 			count=$(( count+1 ))
 			log "[CONFIGURATION] Adding $ip "
-			newLine="server $serverPrefix$count $ip:$port cookie $cookiePrefix$count check"
+			newLine="server $serverPrefix$count $ip:$port cookie $cookiePrefix$count check $HEALTH_CHECK"
 			if [ ! -z "$serverDefs" ]; then
 				serverDefs="$serverDefs\n\t$newLine"
 			else
@@ -181,8 +182,8 @@ case $cmd in
 		generateHAProxyConfig
 		;;
 	start)
-	 	log "[START] Mounting storage volumes"
-            mountSharedStorages
+	 	#log "[START] Mounting storage volumes"
+    #        mountSharedStorages
 		log "[START] Invoking pre-start user script"
 		if [ ! -z "$cliqrUserScript" -a -f "$cliqrUserScript" ]; then
 			$cliqrUserScript 1 $cliqrUserScriptParams
