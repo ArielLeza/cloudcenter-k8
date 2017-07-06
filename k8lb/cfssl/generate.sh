@@ -27,20 +27,20 @@ generate() {
 
   # Swap to unified namespace
   set CSR_K8_ADDRS CSR_ETCD_ADDRS CSR_K8_PUBLIC_ADDR CSR_SERVICE_RTR
-  augmentCsvList CSR_K8_ADDRS "$KUBERNETES_MGR_ADDRS" "\"" "\""
+  augmentCsvList CSR_K8_ADDRS "$MGR_ADDRS" "\"" "\""
   augmentCsvList CSR_ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
-  augmentCsvList CSR_K8_PUBLIC_ADDR "$KUBERNETES_PUBLIC_ADDR" "\"" "\""
-  augmentCsvList CSR_SERVICE_RTR "$SERVICE_CLUSTER_ROUTER" "\"" "\""
+  augmentCsvList CSR_K8_PUBLIC_ADDR "$K8_PUBLIC_ADDR" "\"" "\""
+  augmentCsvList CSR_SERVICE_RTR "$SERVICE_RTR" "\"" "\""
 
 
   cat > kubernetes-csr.json <<EOF
   {
     "CN": "kubernetes",
     "hosts": [
-      ${CSR_K8_ADDRS}
-      ${CSR_ETCD_ADDRS}
-      ${CSR_K8_PUBLIC_ADDR}
-      ${CSR_SERVICE_RTR}
+      ${CSR_K8_ADDRS},
+      ${CSR_ETCD_ADDRS},
+      ${CSR_K8_PUBLIC_ADDR},
+      ${CSR_SERVICE_RTR},
       "127.0.0.1",
       "kubernetes.default"
     ],

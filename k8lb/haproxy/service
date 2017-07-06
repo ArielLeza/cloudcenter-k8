@@ -95,10 +95,7 @@ generateHAProxyConfig() {
 		source "$USER_ENV"
 	fi
 
-  serverIPs="$CliqrTier_k8manager_IP"
-    if [ -z $serverIPs ]; then
-		serverIPs="$CliqrTier_k8manager__PUBLIC_IP"
-	fi
+  serverIPs="$KUBERNETES_MGR_ADDRS"
 
 
 	if [ ! -z "$serverIPs" ]; then

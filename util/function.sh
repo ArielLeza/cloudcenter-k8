@@ -32,9 +32,14 @@ retrieveFiles() {
   local __path=$2
   local __files=$3
 
-  for i in ${__files} ; do
-    scp -o StrictHostKeyChecking=no ${__target}:${__path}/${i} ${__path}/.
-  done
+  if [ ! -z "$__target" ]; then
+    for i in ${__files} ; do
+      scp -o StrictHostKeyChecking=no ${__target}:${__path}/${i} ${__path}/.
+    done
+  else
+    log "[${TIER} ${CMD} retrieveFiles()] Error: target host undefined"
+    exit 127
+  fi
 }
 
 # CLUSTER_CIDRm to other nodes
@@ -92,8 +97,10 @@ prepareEnvironment() {
   # Preprocess environment data
   if [ ! -z $CliqrTier_k8lb_IP ]; then
     local __K8_LB_IP="${CliqrTier_k8lb_IP}"
+    local __K8_LB_PUBIP="${CliqrTier_k8lb_PUBLIC_IP}"
   else
     local __K8_LB_IP="${CliqrTier_k8lb_PUBLIC_IP}"
+    local __K8_LB_PUBIP="${CliqrTier_k8lb_PUBLIC_IP}"
   fi
   if [ ! -z $CliqrTier_k8worker_IP ]; then
     local __K8_WKR_IP="$CliqrTier_k8worker_IP"
@@ -102,10 +109,8 @@ prepareEnvironment() {
   fi
   if [ ! -z $CliqrTier_k8manager_IP ]; then
     local __K8_MGR_IP="$CliqrTier_k8manager_IP"
-    local __K8_MGR_LOCAL="$OSMOSIX_PRIVATE_IP"
   else
     local __K8_MGR_IP="$CliqrTier_k8manager_PUBLIC_IP"
-    local __K8_MGR_LOCAL="$OSMOSIX_PUBLIC_IP"
   fi
   if [ ! -z $CliqrTier_k8etcd_IP ]; then
     local __K8_ETCD_IP="$CliqrTier_k8etcd_IP"
@@ -113,22 +118,36 @@ prepareEnvironment() {
     local __K8_ETCD_IP="$CliqrTier_k8etcd_PUBLIC_IP"
   fi
 
+  # Set local IP address variables for ETCD and MGR Tiers
+  if [ "$TIER" -eq "k8etcd" ]; then
+    ETCD_LOCAL_ADDR="$OSMOSIX_PRIVATE_IP"
+  elif [ "$TIER" -eq "k8manager" ]; then
+    MGR_LOCAL_ADDR="$OSMOSIX_PRIVATE_IP"
+  fi
+
+  # Create IP addr and name arrays
   IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
   IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
   IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP"
-  #IFS=',' read -a nodes <<< "$__K8_ETCD_IP"
   IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
-  #IFS=',' read -a names <<< "$CliqrTier_k8etcd_HOSTNAME"
 
-  KUBERNETES_PUBLIC_ADDR="$__K8_LB_IP"
-  KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
-  ETCD_ADDRS="$__K8_ETCD_IP"
-  SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
-  SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
+  # Set final global variables with addresses
+  K8_PUBLIC_ADDR=${__K8_LB_PUBIP}
+  LB_ADDR=${__K8_LB_IP}
+  ETCD_ADDRS=${__K8_ETCD_IP}
+  MGR_ADDRS=${__K8_MGR_IP}
+  WKR_ADDRS=${__K8_WKR_IP}
 
-  SERVICE_CIDR=${ServiceClusterIpRange}
-  CLUSTER_CIDR=${K8ClusterCIDR}
-  CLUSTER_NAME=${ClusterName}
+  #KUBERNETES_PUBLIC_ADDR="$__K8_LB_IP"
+  #KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
+  #ETCD_ADDRS="$__K8_ETCD_IP"
+  #SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
+  #SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
+
+  SERVICE_CIDR="${ServiceClusterIpRange}"
+  SERVICE_RTR="${ServiceClusterRouter}"
+  CLUSTER_CIDR="${K8ClusterCIDR}"
+  CLUSTER_NAME="${ClusterName}"
 
   export
 

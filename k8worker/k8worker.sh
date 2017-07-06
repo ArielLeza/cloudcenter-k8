@@ -4,11 +4,11 @@ set -x
 
 install() {
 
-  cd ${cliqrAppTierName}
+  cd ${TIER}
   export WD=$(pwd)
 
   # Fetch certificates, configs, and token from LB node home directory
-  retrieveFiles "${__K8_LB_IP}" ~ "token.csv ca.pem ca-key.pem admin.pem admin-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
+  retrieveFiles "${LB_ADDR}" ~ "token.csv ca.pem ca-key.pem admin.pem admin-key.pem kubernetes-key.pem kubernetes.pem bootstrap.kubeconfig kube-proxy.kubeconfig"
 
   sudo mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
   sudo mkdir -p /var/run/kubernetes

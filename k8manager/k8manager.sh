@@ -4,11 +4,11 @@ set -x
 
 install() {
 
-  cd ${cliqrAppTierName}
+  cd ${TIER}
   export WD=$(pwd)
 
   # Fetch certificates and token from LB node home directory
-  retrieveFiles "${CliqrTier_k8lb_PUBLIC_IP}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem "
+  retrieveFiles "${LB_ADDR}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem "
 
   sudo mkdir -p /var/lib/kubernetes/
   cd ~
@@ -43,7 +43,7 @@ install() {
   [Service]
   ExecStart=/usr/bin/kube-apiserver \\
     --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
-    --advertise-address=${__K8_MGR_LOCAL} \\
+    --advertise-address=${MGR_LOCAL_ADDR} \\
     --allow-privileged=true \\
     --apiserver-count=3 \\
     --audit-log-maxage=30 \\
@@ -122,7 +122,7 @@ EOF
   [Service]
   ExecStart=/usr/bin/kube-scheduler \\
     --leader-elect=true \\
-    --master=http://${__K8_MGR_LOCAL}:8080 \\
+    --master=http://${MGR_LOCAL_ADDR}:8080 \\
     --v=2
   Restart=on-failure
   RestartSec=5
@@ -199,7 +199,7 @@ EOF
 
   mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
 
-  pushFiles "$KUBERNETES_PUBLIC_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
+  pushFiles "$LB_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
   fi
 
