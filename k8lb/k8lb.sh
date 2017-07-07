@@ -5,16 +5,19 @@ set -x
 install() {
 
   # Install and configure HAProxy
-  cd ${TIER}/haproxy
+  cd ${BASE_DIR}/${TIER}/haproxy
   export WD=$(pwd)
+  source ${WD}/service
   sudo ${WD}/service install
-  #sudo cp ${WD}/etc/haproxy.cfg /etc/haproxy/haproxy.cfg
+  # installHaproxy
   sudo ${WD}/service configure
+  #generateHAProxyConfig
   sudo ${WD}/service start
-  cd ${BASE_DIR}
+  #startHAProxyService
+  #cd ${BASE_DIR}
 
   # Generate CA and TLS certificates
-  cd ${TIER}/cfssl
+  cd ${BASE_DIR}/${TIER}/cfssl
   export WD=$(pwd)
   source ${WD}/generate.sh
   generate
