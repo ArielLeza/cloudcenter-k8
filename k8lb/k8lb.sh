@@ -8,7 +8,7 @@ install() {
   cd ${TIER}/haproxy
   export WD=$(pwd)
   sudo ${WD}/service install
-  sudo cp etc/haproxy.cfg /etc/haproxy/haproxy.cfg
+  #sudo cp ${WD}/etc/haproxy.cfg /etc/haproxy/haproxy.cfg
   sudo ${WD}/service configure
   sudo ${WD}/service start
   cd ${BASE_DIR}

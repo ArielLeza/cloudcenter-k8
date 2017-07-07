@@ -14,7 +14,7 @@ cmd=$1
 SVCNAME="haproxy"
 SVCHOME="$OSSVC_HOME/$SVCNAME"
 USER_ENV="/usr/local/osmosix/etc/userenv"
-
+BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # A map of os-name to installation-package
 declare -A haproxyPackages=(
@@ -78,7 +78,7 @@ installHaproxy() {
 generateHAProxyConfig() {
 	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg"
   HEALTH_CHECK=" port 8080"
-	cp ${WD}/etc/haproxy.cfg $HAPROXY_CONFIG
+	cp ${BASE_DIR}/etc/haproxy.cfg $HAPROXY_CONFIG
 	chmod 0644 $HAPROXY_CONFIG
 
 	if ([ $os == "CentOS" ] || [ $os == "RHEL" ])
