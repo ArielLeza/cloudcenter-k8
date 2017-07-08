@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # HAProxy configurator
-exec > >(tee -a /usr/local/osmosix/logs/service.log) 2>&1
+#exec > >(tee -a /usr/local/osmosix/logs/service.log) 2>&1
 
 OSSVC_HOME=/usr/local/osmosix/service
 . /usr/local/osmosix/etc/.osmosix.sh
@@ -10,7 +10,10 @@ OSSVC_HOME=/usr/local/osmosix/service
 . $OSSVC_HOME/utils/install_util.sh
 . $OSSVC_HOME/utils/os_info_util.sh
 
+set -x
+
 cmd=$1
+serverIPs="$2"
 SVCNAME="haproxy"
 SVCHOME="$OSSVC_HOME/$SVCNAME"
 USER_ENV="/usr/local/osmosix/etc/userenv"
@@ -30,7 +33,7 @@ fi
 cookiePrefix="LSW_WEB"
 serverPrefix="web"
 port=6443
-serverIPs=""
+
 
 installHaproxy() {
     log "[INSTALL] OS is : $os "
@@ -96,7 +99,7 @@ generateHAProxyConfig() {
 		source "$USER_ENV"
 	fi
 
-  serverIPs="$MGR_ADDRS"
+  #serverIPs="$MGR_ADDRS"
 
 
 	if [ ! -z "$serverIPs" ]; then

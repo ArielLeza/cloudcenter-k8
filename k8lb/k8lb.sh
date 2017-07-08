@@ -7,10 +7,10 @@ install() {
   # Install and configure HAProxy
   cd ${BASE_DIR}/${TIER}/haproxy
   export WD=$(pwd)
-  source ${WD}/service
+  #source ${WD}/service
   sudo ${WD}/service install
   # installHaproxy
-  sudo ${WD}/service configure
+  sudo ${WD}/service configure "$MGR_ADDRS"
   #generateHAProxyConfig
   sudo ${WD}/service start
   #startHAProxyService

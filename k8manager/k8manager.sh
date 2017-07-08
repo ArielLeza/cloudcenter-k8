@@ -8,7 +8,7 @@ install() {
   export WD=$(pwd)
 
   # Fetch certificates and token from LB node home directory
-  retrieveFiles "${LB_ADDR}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem "
+  retrieveFiles "${LB_ADDR}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem kube-proxy.pem kube-proxy-key.pem"
 
   sudo mkdir -p /var/lib/kubernetes/
   cd ~
@@ -165,7 +165,7 @@ EOF
     kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-#    --server=https://${__K8_ETCD_IP}:6443 \
+    --server=https://${K8_PUBLIC_ADDR}:6443 \
     --kubeconfig=bootstrap.kubeconfig
 
   kubectl config set-credentials kubelet-bootstrap \
@@ -182,7 +182,7 @@ EOF
   kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-#    --server=https://${ETCD_ADDRS}:6443 \
+    --server=https://${K8_PUBLIC_ADDR}:6443 \
     --kubeconfig=kube-proxy.kubeconfig
 
   kubectl config set-credentials kube-proxy \

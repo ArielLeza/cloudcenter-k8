@@ -64,8 +64,8 @@ EOF
   chmod +x kubectl kube-proxy kubelet
   sudo mv kubectl kube-proxy kubelet /usr/bin/
 
-  API_SERVERS=$(sudo cat /var/lib/kubelet/bootstrap.kubeconfig | \
-    grep server | cut -d ':' -f2,3,4 | tr -d '[:space:]')
+  #API_SERVERS=$(sudo cat /var/lib/kubelet/bootstrap.kubeconfig | \
+  #  grep server | cut -d ':' -f2,3,4 | tr -d '[:space:]')
 
   cat > kubelet.service <<EOF
   [Unit]
@@ -76,7 +76,7 @@ EOF
 
   [Service]
   ExecStart=/usr/bin/kubelet \\
-    --api-servers=${API_SERVERS} \\
+    --api-servers=${K8_PUBLIC_ADDR} \\
     --allow-privileged=true \\
     --cluster-dns=10.32.0.10 \\
     --cluster-domain=cluster.local \\
@@ -112,7 +112,7 @@ EOF
 
   [Service]
   ExecStart=/usr/bin/kube-proxy \\
-    --cluster-cidr=${__CLUSTER_CIDR} \\
+    --cluster-cidr=${CLUSTER_CIDR} \\
     --masquerade-all=true \\
     --kubeconfig=/var/lib/kube-proxy/kube-proxy.kubeconfig \\
     --proxy-mode=iptables \\
