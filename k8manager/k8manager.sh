@@ -8,28 +8,28 @@ install() {
   export WD=$(pwd)
 
   # Fetch certificates and token from LB node home directory
-  retrieveFiles "${LB_ADDR}" ~ "token.csv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem kube-proxy.pem kube-proxy-key.pem"
+  retrieveFiles "${LB_ADDR}" ~ "encryption-config.yaml ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem kube-proxy.pem kube-proxy-key.pem"
 
   sudo mkdir -p /var/lib/kubernetes/
   cd ~
-  sudo cp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
+  sudo cp encryption-config.yaml ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
   cd ${WD}
 
   # Authentication Initialization
-  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl
+  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
   chmod +x kubectl
   sudo mv kubectl /usr/local/bin
 
 
   # Manager Setup
-  sudo cp ~/token.csv /var/lib/kubernetes/
+  #sudo cp ~/token.csv /var/lib/kubernetes/
 
-  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-apiserver
-  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-controller-manager
-  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-scheduler
-  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl
+  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kube-apiserver
+  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kube-controller-manager
+  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kube-scheduler
+  downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
   chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
-  sudo mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
+  sudo mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/local/bin/
 
   # Create kube-apiserver systemd file
   local ETCD_SVR_LIST=""
@@ -42,15 +42,15 @@ install() {
 
   [Service]
   ExecStart=/usr/bin/kube-apiserver \\
-    --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
+    --admission-control=Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
     --advertise-address=${OSMOSIX_PRIVATE_IP} \\
     --allow-privileged=true \\
     --apiserver-count=3 \\
     --audit-log-maxage=30 \\
     --audit-log-maxbackup=3 \\
     --audit-log-maxsize=100 \\
-    --audit-log-path=/var/lib/audit.log \\
-    --authorization-mode=RBAC \\
+    --audit-log-path=/var/log/audit.log \\
+    --authorization-mode=Node,RBAC \\
     --bind-address=0.0.0.0 \\
     --client-ca-file=/var/lib/kubernetes/ca.pem \\
     --enable-swagger-ui=true \\
@@ -59,19 +59,19 @@ install() {
     --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
     --etcd-servers=${ETCD_SVR_LIST} \\
     --event-ttl=1h \\
-    --experimental-bootstrap-token-auth \\
+    --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
     --insecure-bind-address=0.0.0.0 \\
     --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
     --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
     --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
     --kubelet-https=true \\
-    --runtime-config=rbac.authorization.k8s.io/v1alpha1 \\
+    --runtime-config=api/all \\
     --service-account-key-file=/var/lib/kubernetes/ca-key.pem \\
     --service-cluster-ip-range=${SERVICE_CIDR} \\
     --service-node-port-range=30000-32767 \\
+    --tls-ca-file=/var/lib/kubernetes/ca.pem \\
     --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
     --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
-    --token-auth-file=/var/lib/kubernetes/token.csv \\
     --v=2
   Restart=on-failure
   RestartSec=5
@@ -80,7 +80,6 @@ install() {
   WantedBy=multi-user.target
 EOF
 
-  sudo mv kube-apiserver.service /etc/systemd/system/
 
   # create kube-controller-manager systemd file
 
@@ -92,13 +91,12 @@ EOF
   [Service]
   ExecStart=/usr/bin/kube-controller-manager \\
     --address=0.0.0.0 \\
-    --allocate-node-cidrs=true \\
     --cluster-cidr=${CLUSTER_CIDR} \\
     --cluster-name=kubernetes \\
     --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
     --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
     --leader-elect=true \\
-    --master=http://${OSMOSIX_PRIVATE_IP}:8080 \\
+    --master=http://127.0.0.1:8080 \\
     --root-ca-file=/var/lib/kubernetes/ca.pem \\
     --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \\
     --service-cluster-ip-range=${SERVICE_CIDR} \\
@@ -110,7 +108,6 @@ EOF
   WantedBy=multi-user.target
 EOF
 
-  sudo mv kube-controller-manager.service /etc/systemd/system/
 
   # create kube-scheduler systemd file
 
@@ -122,7 +119,7 @@ EOF
   [Service]
   ExecStart=/usr/bin/kube-scheduler \\
     --leader-elect=true \\
-    --master=http://${OSMOSIX_PRIVATE_IP}:8080 \\
+    --master=http://127.0.0.1:8080 \\
     --v=2
   Restart=on-failure
   RestartSec=5
@@ -131,36 +128,104 @@ EOF
   WantedBy=multi-user.target
 EOF
 
-  sudo mv kube-scheduler.service /etc/systemd/system/
+  # sudo mv kube-apiserver.service /etc/systemd/system/
+  # sudo mv kube-controller-manager.service /etc/systemd/system/
+  # sudo mv kube-scheduler.service /etc/systemd/system/
+  sudo mv kube-apiserver.service kube-controller-manager.service kube-scheduler.service /etc/systemd/system/
 
   # Reload systemd to read all new systemd files
   sudo systemctl daemon-reload
 
   # Enable and start all kube services
-  sudo systemctl enable kube-controller-manager
-  sudo systemctl start kube-controller-manager
-  sudo systemctl enable kube-apiserver
-  sudo systemctl start kube-apiserver
-  sudo systemctl enable kube-scheduler
-  sudo systemctl start kube-scheduler
+  # sudo systemctl enable kube-controller-manager
+  # sudo systemctl start kube-controller-manager
+  # sudo systemctl enable kube-apiserver
+  # sudo systemctl start kube-apiserver
+  # sudo systemctl enable kube-scheduler
+  # sudo systemctl start kube-scheduler
+  sudo systemctl enable kube-controller-manager kube-apiserver kube-scheduler
+  sudo systemctl start kube-controller-manager kube-apiserver kube-scheduler
 
   sleep 30
   # sudo systemctl status kube-apiserver --no-pager
   # sudo systemctl status kube-controller-manager --no-pager
   # sudo systemctl status kube-scheduler --no-pager
-  # kubectl get componentstatuses
+  kubectl get componentstatuses
 
   # Prepare for worker join
-  kubectl create clusterrolebinding kubelet-bootstrap \
-    --clusterrole=system:node-bootstrapper \
-    --user=kubelet-bootstrap
+  # kubectl create clusterrolebinding kubelet-bootstrap \
+  #   --clusterrole=system:node-bootstrapper \
+  #   --user=kubelet-bootstrap
 
   # CREATE BOOTSTRAP AUTHENTICATION (ON MANAGER0 ONLY)
   cd ~
   if [ "$VM_NODE_INDEX" -eq "1" ]; then
-    BOOTSTRAP_TOKEN_CSV=$(cat ~/token.csv)
-    IFS=',' read -a TOKEN <<< "$BOOTSTRAP_TOKEN_CSV"
-    BOOTSTRAP_TOKEN=${TOKEN[0]}
+    # BOOTSTRAP_TOKEN_CSV=$(cat ~/token.csv)
+    # IFS=',' read -a TOKEN <<< "$BOOTSTRAP_TOKEN_CSV"
+    # BOOTSTRAP_TOKEN=${TOKEN[0]}
+
+    cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:kube-apiserver-to-kubelet
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/proxy
+      - nodes/stats
+      - nodes/log
+      - nodes/spec
+      - nodes/metrics
+    verbs:
+      - "*"
+EOF
+
+    cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: system:kube-apiserver
+  namespace: ""
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-apiserver-to-kubelet
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: kubernetes
+EOF
+
+  #for each worker node
+  for ((i=0; i<${#wkr_name[*]}; i++)); do
+    kubectl config set-cluster ${ClusterName} \
+      --certificate-authority=ca.pem \
+      --embed-certs=true \
+      --server=https://${K8_PUBLIC_ADDR}:6443 \
+      --kubeconfig=${wkr_name[i]}.kubeconfig
+
+    kubectl config set-credentials system:node:${wkr_name[i]} \
+      --client-certificate=${wkr_name[i]}.pem \
+      --client-key=${wkr_name[i]}-key.pem \
+      --embed-certs=true \
+      --kubeconfig=${wkr_name[i]}.kubeconfig
+
+    kubectl config set-context default \
+      --cluster=kubernetes-the-hard-way \
+      --user=system:node:${wkr_name[i]} \
+      --kubeconfig=${wkr_name[i]}.kubeconfig
+
+    kubectl config use-context default --kubeconfig=${wkr_name[i]}.kubeconfig
+
+    mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
+    pushFiles "$LB_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
+  done
 
     kubectl config set-cluster ${CLUSTER_NAME} \
     --certificate-authority=ca.pem \
@@ -198,7 +263,6 @@ EOF
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
   mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
-
   pushFiles "$LB_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
 
   fi

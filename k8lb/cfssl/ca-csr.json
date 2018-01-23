@@ -7,10 +7,10 @@
   "names": [
     {
       "C": "US",
-      "L": "Las Vegas",
+      "L": "Philadelphia",
       "O": "Kubernetes",
-      "OU": "CA",
-      "ST": "Nevada"
+      "OU": "PA",
+      "ST": "Pennsylvania"
     }
   ]
 }

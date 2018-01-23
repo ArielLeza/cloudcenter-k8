@@ -122,7 +122,26 @@ prepareEnvironment() {
   IFS=',' read -a wkr_ip <<< "$__K8_WKR_IP"
   IFS=',' read -a mgr_ip <<< "$__K8_MGR_IP"
   IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP"
-  IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
+  #IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
+
+  if [ ! -z $CliqrTier_k8etcd_HOSTNAME ]; then
+    IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
+  else
+    log "[${TIER} ${CMD}] Error: CliqrTier_k8etcd_HOSTNAME undefined"
+    exit 127
+  fi
+  if [ ! -z $CliqrTier_k8worker_HOSTNAME ]; then
+    IFS=',' read -a wkr_name <<< "$CliqrTier_k8worker_HOSTNAME"
+  else
+    log "[${TIER} ${CMD}] Error: CliqrTier_k8worker_HOSTNAME undefined"
+    exit 127
+  fi
+  if [ ! -z $CliqrTier_k8manager_HOSTNAME ]; then
+    IFS=',' read -a mgr_name <<< "$CliqrTier_k8manager_HOSTNAME"
+  else
+    log "[${TIER} ${CMD}] Error: CliqrTier_k8manager_HOSTNAME undefined"
+    exit 127
+  fi
 
   # Set final global variables with addresses
   K8_PUBLIC_ADDR=${__K8_LB_PUBIP}
@@ -139,7 +158,7 @@ prepareEnvironment() {
 
   SERVICE_CIDR="${ServiceClusterIpRange}"
   SERVICE_RTR="${ServiceClusterRouter}"
-  CLUSTER_CIDR="${K8ClusterCIDR}"
+  CLUSTER_CIDR="${K8ClusterNET}/${K8ClusterMASK}"
   CLUSTER_NAME="${ClusterName}"
 
   export
@@ -154,5 +173,19 @@ prepareEnvironment() {
 log() {
 	if [ -n "$USE_PROFILE_LOG"  -a "$USE_PROFILE_LOG" == "true" ];then
 	    echo "$*"
+	fi
+}
+
+# Install software based on OS Type
+#  OSSVC_CONFIG="ubuntu16"
+#  OSSVC_CONFIG="CentOS"
+installSoft() {
+	if [ ${OSSVC_CONFIG} == "ubuntu16" ];then
+	  sudo apt-get -y install "$*"
+  elif [ ${OSSVC_CONFIG} == "CentOS" ]; then
+    sudo yum -y install "$*"
+  else
+    log "[${TIER} ${CMD}] Error: OSSVC_CONFIG unsupported type - ${OSSVC_CONFIG}"
+    exit 127
 	fi
 }

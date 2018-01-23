@@ -13,13 +13,13 @@ install() {
   # Fetch certificates
   retrieveFiles "$LB_ADDR" ~ "ca.pem kubernetes-key.pem kubernetes.pem admin.pem admin-key.pem "
 
-  downloadFile https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz
-  tar xzf etcd-v3.1.4-linux-amd64.tar.gz
+  downloadFile https://github.com/coreos/etcd/releases/download/v3.2.11/etcd-v3.2.11-linux-amd64.tar.gz
+  tar xzf etcd-v3.2.11-linux-amd64.tar.gz
 
-  sudo mkdir -p /etc/etcd/
+  sudo mkdir -p /etc/etcd/ /var/lib/etcd
   sudo mv ~/ca.pem ~/kubernetes-key.pem ~/kubernetes.pem /etc/etcd/
-  sudo mv etcd-v3.1.4-linux-amd64/etcd* /usr/bin/
-  sudo mkdir -p /var/lib/etcd
+  sudo mv etcd-v3.2.11-linux-amd64/etcd* /usr/local/bin/
+  #sudo mkdir -p /var/lib/etcd
 
   # Here we are taking public ip of all node in array. Current etcd cluster node
   # name is based on order in IP list, current etcd name is stored for later use.
@@ -79,6 +79,9 @@ EOF
   sudo systemctl daemon-reload
   sudo systemctl enable etcd
   sudo systemctl start etcd
+
+  sleep 90
+  ETCDCTL_API=3 etcdctl member list
 
   #sleep 180
   #sudo systemctl status etcd --no-pager
