@@ -16,6 +16,17 @@ install() {
   #startHAProxyService
   #cd ${BASE_DIR}
 
+  # Install CloudFlare SSL utilities
+  downloadFile https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+  downloadFile https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+
+  chmod +x cfssl_linux-amd64 cfssljson_linux-amd64
+
+  sudo mv cfssl_linux-amd64 /usr/local/bin/cfssl
+  sudo mv cfssljson_linux-amd64 /usr/local/bin/cfssljson
+
+  cfssl version
+
   # Generate CA and TLS certificates
   cd ${BASE_DIR}/${TIER}/cfssl
   export WD=$(pwd)

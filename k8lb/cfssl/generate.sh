@@ -9,21 +9,21 @@ generate() {
     set -x
   fi
 
-  ${WD}/cfssl gencert -initca ca-csr.json | ${WD}/cfssljson -bare ca
+  cfssl gencert -initca ca-csr.json | cfssljson -bare ca
 
-  ${WD}/cfssl gencert \
+  cfssl gencert \
     -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
     -profile=kubernetes \
-    admin-csr.json | ${WD}/cfssljson -bare admin
+    admin-csr.json | cfssljson -bare admin
 
-  ${WD}/cfssl gencert \
+  cfssl gencert \
     -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
     -profile=kubernetes \
-    kube-proxy-csr.json | ${WD}/cfssljson -bare kube-proxy
+    kube-proxy-csr.json | cfssljson -bare kube-proxy
 
   # Swap to unified namespace
   set CSR_MGR_ADDRS CSR_ETCD_ADDRS CSR_K8_PUBLIC_ADDR CSR_SERVICE_RTR
