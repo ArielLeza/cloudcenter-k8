@@ -26,11 +26,11 @@ generate() {
     kube-proxy-csr.json | cfssljson -bare kube-proxy
 
   # Swap to unified namespace
-  set CSR_MGR_ADDRS CSR_ETCD_ADDRS CSR_K8_PUBLIC_ADDR CSR_SERVICE_RTR
-  augmentCsvList CSR_MGR_ADDRS "$MGR_ADDRS" "\"" "\""
-  augmentCsvList CSR_ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
-  augmentCsvList CSR_K8_PUBLIC_ADDR "$K8_PUBLIC_ADDR" "\"" "\""
-  augmentCsvList CSR_SERVICE_RTR "$SERVICE_RTR" "\"" "\""
+  # set CSR_MGR_ADDRS CSR_ETCD_ADDRS CSR_K8_PUBLIC_ADDR CSR_SERVICE_RTR
+  # augmentCsvList CSR_MGR_ADDRS "$MGR_ADDRS" "\"" "\""
+  # augmentCsvList CSR_ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
+  # augmentCsvList CSR_K8_PUBLIC_ADDR "$K8_PUBLIC_ADDR" "\"" "\""
+  # augmentCsvList CSR_SERVICE_RTR "$SERVICE_RTR" "\"" "\""
 
   #for each worker node
   for ((i=0; i<${#wkr_name[*]}; i++)); do

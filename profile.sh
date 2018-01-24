@@ -5,6 +5,7 @@ source /usr/local/osmosix/etc/userenv
 source /usr/local/osmosix/etc/.osmosix.sh
 
 set -x
+PATH=${PATH}:/usr/local/bin
 env
 
 BASE_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
