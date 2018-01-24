@@ -25,12 +25,6 @@ generate() {
     -profile=kubernetes \
     kube-proxy-csr.json | cfssljson -bare kube-proxy
 
-  # Swap to unified namespace
-  # set CSR_MGR_ADDRS CSR_ETCD_ADDRS CSR_K8_PUBLIC_ADDR CSR_SERVICE_RTR
-  # augmentCsvList CSR_MGR_ADDRS "$MGR_ADDRS" "\"" "\""
-  # augmentCsvList CSR_ETCD_ADDRS "$ETCD_ADDRS" "\"" "\""
-  # augmentCsvList CSR_K8_PUBLIC_ADDR "$K8_PUBLIC_ADDR" "\"" "\""
-  # augmentCsvList CSR_SERVICE_RTR "$SERVICE_RTR" "\"" "\""
 
   #for each worker node
   for ((i=0; i<${#wkr_name[*]}; i++)); do
@@ -64,46 +58,14 @@ EOF
 
 done
 
-#  cat > kubernetes-csr.json <<EOF
-#   {
-#     "CN": "kubernetes",
-#     "hosts": [
-#       ${CSR_MGR_ADDRS},
-#       ${CSR_ETCD_ADDRS},
-#       ${CSR_K8_PUBLIC_ADDR},
-#       ${CSR_SERVICE_RTR},
-#       "127.0.0.1",
-#       "kubernetes.default"
-#     ],
-#     "key": {
-#       "algo": "rsa",
-#       "size": 2048
-#     },
-#     "names": [
-#       {
-#         "C": "US",
-#         "L": "Las Vegas",
-#         "O": "Kubernetes",
-#         "OU": "Cluster",
-#         "ST": "Nevada"
-#       }
-#     ]
-#   }
-# EOF
-
   cfssl gencert \
     -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
-    -hostname=10.32.0.1,${CliqrTier_k8manager_HOSTNAME},${K8_PUBLIC_ADDR},127.0.0.1,kubernetes.default \
+    -hostname=${SERVICE_RTR},${CliqrTier_k8manager_HOSTNAME},${K8_PUBLIC_ADDR},127.0.0.1,kubernetes.default \
     -profile=kubernetes \
     kubernetes-csr.json | cfssljson -bare kubernetes
 
-  # ${WD}/cfssl gencert \
-  #   -ca=ca.pem \
-  #   -ca-key=ca-key.pem \
-  #   -config=ca-config.json \
-  #   -profile=kubernetes \
-  #   kubernetes-csr.json | ${WD}/cfssljson -bare kubernetes
+mv *.pem $1
 
 }

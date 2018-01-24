@@ -8,7 +8,7 @@ install() {
   export WD=$(pwd)
 
   # Fetch certificates and token from LB node home directory
-  retrieveFiles "${LB_ADDR}" ~ "encryption-config.yaml ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem  admin.pem admin-key.pem kube-proxy.pem kube-proxy-key.pem"
+  retrieveFiles "${LB_ADDR}" ~ "encryption-config.yaml ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem"
 
   sudo mkdir -p /var/lib/kubernetes/
   cd ~
@@ -20,9 +20,7 @@ install() {
   chmod +x kubectl
   sudo mv kubectl /usr/local/bin
 
-
   # Manager Setup
-  #sudo cp ~/token.csv /var/lib/kubernetes/
 
   downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kube-apiserver
   downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kube-controller-manager
@@ -41,7 +39,7 @@ install() {
   Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
   [Service]
-  ExecStart=/usr/bin/local/kube-apiserver \\
+  ExecStart=/usr/local/bin/kube-apiserver \\
     --admission-control=Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
     --advertise-address=${OSMOSIX_PRIVATE_IP} \\
     --allow-privileged=true \\
@@ -80,7 +78,6 @@ install() {
   WantedBy=multi-user.target
 EOF
 
-
   # create kube-controller-manager systemd file
 
   cat > kube-controller-manager.service <<EOF
@@ -89,7 +86,7 @@ EOF
   Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
   [Service]
-  ExecStart=/usr/bin/local/kube-controller-manager \\
+  ExecStart=/usr/local/bin/kube-controller-manager \\
     --address=0.0.0.0 \\
     --cluster-cidr=${CLUSTER_CIDR} \\
     --cluster-name=kubernetes \\
@@ -108,7 +105,6 @@ EOF
   WantedBy=multi-user.target
 EOF
 
-
   # create kube-scheduler systemd file
 
   cat > kube-scheduler.service <<EOF
@@ -117,7 +113,7 @@ EOF
   Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
   [Service]
-  ExecStart=/usr/bin/local/kube-scheduler \\
+  ExecStart=/usr/local/bin/kube-scheduler \\
     --leader-elect=true \\
     --master=http://127.0.0.1:8080 \\
     --v=2
@@ -128,41 +124,21 @@ EOF
   WantedBy=multi-user.target
 EOF
 
-  # sudo mv kube-apiserver.service /etc/systemd/system/
-  # sudo mv kube-controller-manager.service /etc/systemd/system/
-  # sudo mv kube-scheduler.service /etc/systemd/system/
   sudo mv kube-apiserver.service kube-controller-manager.service kube-scheduler.service /etc/systemd/system/
 
   # Reload systemd to read all new systemd files
   sudo systemctl daemon-reload
 
   # Enable and start all kube services
-  # sudo systemctl enable kube-controller-manager
-  # sudo systemctl start kube-controller-manager
-  # sudo systemctl enable kube-apiserver
-  # sudo systemctl start kube-apiserver
-  # sudo systemctl enable kube-scheduler
-  # sudo systemctl start kube-scheduler
   sudo systemctl enable kube-controller-manager kube-apiserver kube-scheduler
   sudo systemctl start kube-controller-manager kube-apiserver kube-scheduler
 
   sleep 60
-  # sudo systemctl status kube-apiserver --no-pager
-  # sudo systemctl status kube-controller-manager --no-pager
-  # sudo systemctl status kube-scheduler --no-pager
   kubectl get componentstatuses
-
-  # Prepare for worker join
-  # kubectl create clusterrolebinding kubelet-bootstrap \
-  #   --clusterrole=system:node-bootstrapper \
-  #   --user=kubelet-bootstrap
 
   # CREATE BOOTSTRAP AUTHENTICATION (ON MANAGER0 ONLY)
   cd ~
   if [ "$VM_NODE_INDEX" -eq "1" ]; then
-    # BOOTSTRAP_TOKEN_CSV=$(cat ~/token.csv)
-    # IFS=',' read -a TOKEN <<< "$BOOTSTRAP_TOKEN_CSV"
-    # BOOTSTRAP_TOKEN=${TOKEN[0]}
 
     cat <<EOF | kubectl apply -f -
 apiVersion: rbac.authorization.k8s.io/v1beta1

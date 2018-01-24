@@ -31,9 +31,9 @@ install() {
   cd ${BASE_DIR}/${TIER}/cfssl
   export WD=$(pwd)
   source ${WD}/generate.sh
-  generate
+  generate ~
 
-  #cd ${BASE_DIR}
+  cd ${BASE_DIR}
 
   downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
   chmod +x kubectl
@@ -79,7 +79,7 @@ install() {
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
-  mv kube-proxy.kubeconfig ~
+  mv *.kubeconfig ~
 
   # Seed Encryption
   ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
@@ -100,14 +100,4 @@ EOF
 
   mv encryption-config.yaml ~
 
-  cp ${WD}/*.pem ~/.
-
-  # Create kubelet bootstrap token
-  #BOOTSTRAP_TOKEN=$(head -c 16 /dev/urandom | od -An -t x | tr -d ' ')
-
-  #cat > ${BASE_DIR}/token.csv <<EOF
-  #${BOOTSTRAP_TOKEN},kubelet-bootstrap,10001,"system:kubelet-bootstrap"
-#EOF
-
-  #cp ${BASE_DIR}/token.csv ~/.
 }
