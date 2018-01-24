@@ -48,7 +48,7 @@ install() {
   Documentation=https://github.com/coreos
 
   [Service]
-  ExecStart=/usr/bin/etcd \\
+  ExecStart=/usr/local/bin/etcd \\
     --name ${cliqrNodeHostname} \\
     --cert-file=/etc/etcd/kubernetes.pem \\
     --key-file=/etc/etcd/kubernetes-key.pem \\
@@ -81,7 +81,7 @@ EOF
   sudo systemctl start etcd
 
   sleep 90
-  ETCDCTL_API=3 etcdctl member list
+  ETCDCTL_API=3 /usr/local/bin/etcdctl member list
 
   #sleep 180
   #sudo systemctl status etcd --no-pager

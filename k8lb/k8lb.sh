@@ -33,9 +33,7 @@ install() {
   source ${WD}/generate.sh
   generate
 
-  cp ${WD}/*.pem ~/.
-
-  cd ${BASE_DIR}
+  #cd ${BASE_DIR}
 
   downloadFile https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
   chmod +x kubectl
@@ -65,7 +63,7 @@ install() {
     mv ${wkr_name[i]}.kubeconfig ~
   done
 
-  kubectl config set-cluster kubernetes-the-hard-way \
+  kubectl config set-cluster ${ClusterName} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://${K8_PUBLIC_ADDR}:6443 \
@@ -101,6 +99,8 @@ resources:
 EOF
 
   mv encryption-config.yaml ~
+
+  cp ${WD}/*.pem ~/.
 
   # Create kubelet bootstrap token
   #BOOTSTRAP_TOKEN=$(head -c 16 /dev/urandom | od -An -t x | tr -d ' ')
