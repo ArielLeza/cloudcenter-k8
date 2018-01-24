@@ -7,6 +7,8 @@ install() {
   cd ${TIER}
   export WD=$(pwd)
 
+  log 'BEGIN K8MANAGER'
+
   # Fetch certificates and token from LB node home directory
   retrieveFiles "${LB_ADDR}" ~ "encryption-config.yaml ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem"
 

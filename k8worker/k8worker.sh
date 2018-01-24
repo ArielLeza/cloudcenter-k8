@@ -7,8 +7,10 @@ install() {
   cd ${TIER}
   export WD=$(pwd)
 
+  log 'BEGIN K8WORKER'
+
   # Fetch certificates, configs, and token from LB node home directory
-  retrieveFiles "${LB_ADDR}" ~ "ca.pem kubernetes-key.pem kubernetes.pem kube-proxy.kubeconfig ${cliqrNodeHostname}.pem ${cliqrNodeHostname}-key.pem ${cliqrNodeHostname}.kubeconfig"
+  retrieveFiles "${LB_ADDR}" ~ "ca.pem kube-proxy.kubeconfig ${cliqrNodeHostname}.pem ${cliqrNodeHostname}-key.pem ${cliqrNodeHostname}.kubeconfig"
 
   POD_CIDR=$(echo $CLUSTER_CIDR | cut -d"." -f1-2)
   POD_CIDR="${POD_CIDR}.${VM_NODE_INDEX}.0/24"
@@ -62,9 +64,9 @@ EOF
 
   # Configure the Kubelet and Kube-Proxy
   sudo mv ~/ca.pem /var/lib/kubernetes/
-  sudo mv "~/*.pem" /var/lib/kubelet/
-  sudo mv "~/kube-proxy.kubeconfig" /var/lib/kube-proxy/kubeconfig
-  sudo mv "~/*.kubeconfig" /var/lib/kubelet/kubeconfig
+  sudo mv ~/${cliqrNodeHostname}.pem ~/${cliqrNodeHostname}-key.pem /var/lib/kubelet/
+  sudo mv ~/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
+  sudo mv ~/${cliqrNodeHostname}.kubeconfig /var/lib/kubelet/kubeconfig
 
   # Configure kubelet service
   cat > kubelet.service <<EOF

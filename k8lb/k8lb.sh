@@ -7,6 +7,9 @@ install() {
   # Install and configure HAProxy
   cd ${BASE_DIR}/${TIER}/haproxy
   export WD=$(pwd)
+
+  log 'BEGIN K8LB'
+
   #source ${WD}/service
   sudo ${WD}/service install
   # installHaproxy

@@ -150,12 +150,6 @@ prepareEnvironment() {
   MGR_ADDRS=${__K8_MGR_IP}
   WKR_ADDRS=${__K8_WKR_IP}
 
-  #KUBERNETES_PUBLIC_ADDR="$__K8_LB_IP"
-  #KUBERNETES_MGR_ADDRS="$__K8_MGR_IP"
-  #ETCD_ADDRS="$__K8_ETCD_IP"
-  #SERVICE_CLUSTER_IP_RANGE="$ServiceClusterIpRange"
-  #SERVICE_CLUSTER_ROUTER="$ServiceClusterRouter"
-
   SERVICE_CIDR="${ServiceClusterIpRange}"
   SERVICE_RTR="${ServiceClusterRouter}"
   CLUSTER_CIDR="${K8ClusterNET}/${K8ClusterMASK}"

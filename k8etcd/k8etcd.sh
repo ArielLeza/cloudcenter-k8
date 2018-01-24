@@ -7,6 +7,8 @@ install() {
   cd ${TIER}
   export WD=$(pwd)
 
+  log 'BEGIN K8ETCD'
+
   # Verify needed data
   echo LB_ADDR=$LB_ADDR ETCD_LOCAL_ADDR=$ETCD_LOCAL_ADDR
 
