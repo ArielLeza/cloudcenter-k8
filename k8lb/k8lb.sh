@@ -54,7 +54,7 @@ install() {
       --kubeconfig=${wkr_name[i]}.kubeconfig
 
     kubectl config set-context default \
-      --cluster=kubernetes-the-hard-way \
+      --cluster=${ClusterName} \
       --user=system:node:${wkr_name[i]} \
       --kubeconfig=${wkr_name[i]}.kubeconfig
 
@@ -74,7 +74,7 @@ install() {
     --embed-certs=true \
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config set-context default \
-    --cluster=kubernetes-the-hard-way \
+    --cluster=${ClusterName} \
     --user=kube-proxy \
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig

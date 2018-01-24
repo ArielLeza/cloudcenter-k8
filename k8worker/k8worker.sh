@@ -89,8 +89,8 @@ EOF
 
   # Configure the Kubelet
 
-  sudo mv ${cliqrNodeHostname}-key.pem ${cliqrNodeHostname}.pem /var/lib/kubelet/
-  sudo mv ${cliqrNodeHostname}.kubeconfig /var/lib/kubelet/kubeconfig
+  sudo mv "${cliqrNodeHostname}-key.pem" "${cliqrNodeHostname}.pem" /var/lib/kubelet/
+  sudo mv "${cliqrNodeHostname}.kubeconfig" /var/lib/kubelet/kubeconfig
   sudo mv ca.pem /var/lib/kubernetes/
 
   cat > kubelet.service <<EOF

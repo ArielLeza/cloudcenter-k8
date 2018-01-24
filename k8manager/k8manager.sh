@@ -41,7 +41,7 @@ install() {
   Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
   [Service]
-  ExecStart=/usr/bin/kube-apiserver \\
+  ExecStart=/usr/bin/local/kube-apiserver \\
     --admission-control=Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
     --advertise-address=${OSMOSIX_PRIVATE_IP} \\
     --allow-privileged=true \\
@@ -89,7 +89,7 @@ EOF
   Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
   [Service]
-  ExecStart=/usr/bin/kube-controller-manager \\
+  ExecStart=/usr/bin/local/kube-controller-manager \\
     --address=0.0.0.0 \\
     --cluster-cidr=${CLUSTER_CIDR} \\
     --cluster-name=kubernetes \\
@@ -117,7 +117,7 @@ EOF
   Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
   [Service]
-  ExecStart=/usr/bin/kube-scheduler \\
+  ExecStart=/usr/bin/local/kube-scheduler \\
     --leader-elect=true \\
     --master=http://127.0.0.1:8080 \\
     --v=2
@@ -146,7 +146,7 @@ EOF
   sudo systemctl enable kube-controller-manager kube-apiserver kube-scheduler
   sudo systemctl start kube-controller-manager kube-apiserver kube-scheduler
 
-  sleep 30
+  sleep 60
   # sudo systemctl status kube-apiserver --no-pager
   # sudo systemctl status kube-controller-manager --no-pager
   # sudo systemctl status kube-scheduler --no-pager
@@ -202,89 +202,7 @@ subjects:
     name: kubernetes
 EOF
 
-  #for each worker node
-  for ((i=0; i<${#wkr_name[*]}; i++)); do
-    kubectl config set-cluster ${ClusterName} \
-      --certificate-authority=ca.pem \
-      --embed-certs=true \
-      --server=https://${K8_PUBLIC_ADDR}:6443 \
-      --kubeconfig=${wkr_name[i]}.kubeconfig
-
-    kubectl config set-credentials system:node:${wkr_name[i]} \
-      --client-certificate=${wkr_name[i]}.pem \
-      --client-key=${wkr_name[i]}-key.pem \
-      --embed-certs=true \
-      --kubeconfig=${wkr_name[i]}.kubeconfig
-
-    kubectl config set-context default \
-      --cluster=kubernetes-the-hard-way \
-      --user=system:node:${wkr_name[i]} \
-      --kubeconfig=${wkr_name[i]}.kubeconfig
-
-    kubectl config use-context default --kubeconfig=${wkr_name[i]}.kubeconfig
-
-    mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
-    pushFiles "$LB_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
-  done
-
-    kubectl config set-cluster ${CLUSTER_NAME} \
-    --certificate-authority=ca.pem \
-    --embed-certs=true \
-    --server=https://${K8_PUBLIC_ADDR}:6443 \
-    --kubeconfig=bootstrap.kubeconfig
-
-  kubectl config set-credentials kubelet-bootstrap \
-    --token=${BOOTSTRAP_TOKEN} \
-    --kubeconfig=bootstrap.kubeconfig
-
-  kubectl config set-context default \
-    --cluster=${CLUSTER_NAME} \
-    --user=kubelet-bootstrap \
-    --kubeconfig=bootstrap.kubeconfig
-
-  kubectl config use-context default --kubeconfig=bootstrap.kubeconfig
-
-  kubectl config set-cluster ${CLUSTER_NAME} \
-    --certificate-authority=ca.pem \
-    --embed-certs=true \
-    --server=https://${K8_PUBLIC_ADDR}:6443 \
-    --kubeconfig=kube-proxy.kubeconfig
-
-  kubectl config set-credentials kube-proxy \
-    --client-certificate=kube-proxy.pem \
-    --client-key=kube-proxy-key.pem \
-    --embed-certs=true \
-    --kubeconfig=kube-proxy.kubeconfig
-
-  kubectl config set-context default \
-    --cluster=${CLUSTER_NAME} \
-    --user=kube-proxy \
-    --kubeconfig=kube-proxy.kubeconfig
-  kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
-
-  mv bootstrap.kubeconfig kube-proxy.kubeconfig ~
-  pushFiles "$LB_ADDR" ~ "bootstrap.kubeconfig kube-proxy.kubeconfig"
-
   fi
-
-  cat > ~/kubectl-cfg.sh <<EOF
-  K8_PUBIP=${K8_PUBLIC_ADDR}
-
-  kubectl config set-cluster ${CLUSTER_NAME} \
-    --certificate-authority=ca.pem \
-    --embed-certs=true \
-    --server=https://${K8_PUBIP}:6443
-
-  kubectl config set-credentials admin \
-    --client-certificate=admin.pem \
-    --client-key=admin-key.pem
-
-  kubectl config set-context ${CLUSTER_NAME} \
-    --cluster=${CLUSTER_NAME} \
-    --user=admin
-
-  kubectl config use-context ${CLUSTER_NAME}
-EOF
 
   cd ${BASE_DIR}
 
