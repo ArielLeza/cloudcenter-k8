@@ -42,28 +42,30 @@ install() {
   chmod +x kubectl
   sudo mv kubectl /usr/local/bin
 
+  cd ~
   #for each worker node
   for ((i=0; i<${#wkr_name[*]}; i++)); do
+    local __HOSTNAME=$(echo ${wkr_name[i]} | cut -d'.' -f1)
     kubectl config set-cluster ${ClusterName} \
       --certificate-authority=ca.pem \
       --embed-certs=true \
       --server=https://${K8_PUBLIC_ADDR}:6443 \
-      --kubeconfig=${wkr_name[i]}.kubeconfig
+      --kubeconfig=${__HOSTNAME}.kubeconfig
 
-    kubectl config set-credentials system:node:${wkr_name[i]} \
-      --client-certificate=${wkr_name[i]}.pem \
-      --client-key=${wkr_name[i]}-key.pem \
+    kubectl config set-credentials system:node:${__HOSTNAME} \
+      --client-certificate=${__HOSTNAME}.pem \
+      --client-key=${__HOSTNAME}-key.pem \
       --embed-certs=true \
-      --kubeconfig=${wkr_name[i]}.kubeconfig
+      --kubeconfig=${__HOSTNAME}.kubeconfig
 
     kubectl config set-context default \
       --cluster=${ClusterName} \
-      --user=system:node:${wkr_name[i]} \
-      --kubeconfig=${wkr_name[i]}.kubeconfig
+      --user=system:node:${__HOSTNAME} \
+      --kubeconfig=${__HOSTNAME}.kubeconfig
 
-    kubectl config use-context default --kubeconfig=${wkr_name[i]}.kubeconfig
+    kubectl config use-context default --kubeconfig=${__HOSTNAME}.kubeconfig
 
-    mv ${wkr_name[i]}.kubeconfig ~
+    #mv ${__HOSTNAME}.kubeconfig ~
   done
 
   kubectl config set-cluster ${ClusterName} \
@@ -82,7 +84,7 @@ install() {
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
-  mv *.kubeconfig ~
+  # mv *.kubeconfig ~
 
   # Seed Encryption
   ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
@@ -101,6 +103,7 @@ resources:
       - identity: {}
 EOF
 
-  mv encryption-config.yaml ~
+  cd ${BASE_DIR}
+  #mv encryption-config.yaml ~
 
 }

@@ -155,6 +155,10 @@ prepareEnvironment() {
   CLUSTER_CIDR="${K8ClusterNET}/${K8ClusterMASK}"
   CLUSTER_NAME="${ClusterName}"
 
+  local __HOSTNAME=$(echo ${cliqrNodeHostname} | cut -d'.' -f1)
+  sudo echo ${__HOSTNAME} > /etc/hostname
+  sudo hostname ${__HOSTNAME}
+
   export
 
   if [ ! -z "$DEBUG" ]; then

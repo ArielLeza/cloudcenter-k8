@@ -9,8 +9,9 @@ install() {
 
   log 'BEGIN K8WORKER'
 
+  local __HOSTNAME=$(hostname -s)
   # Fetch certificates, configs, and token from LB node home directory
-  retrieveFiles "${LB_ADDR}" ~ "ca.pem kube-proxy.kubeconfig ${cliqrNodeHostname}.pem ${cliqrNodeHostname}-key.pem ${cliqrNodeHostname}.kubeconfig"
+  retrieveFiles "${LB_ADDR}" ~ "ca.pem kube-proxy.kubeconfig ${__HOSTNAME}.pem ${__HOSTNAME}-key.pem ${__HOSTNAME}.kubeconfig"
 
   POD_CIDR=$(echo $CLUSTER_CIDR | cut -d"." -f1-2)
   POD_CIDR="${POD_CIDR}.${VM_NODE_INDEX}.0/24"
@@ -124,6 +125,8 @@ EOF
 
   sudo mv kubelet.service kube-proxy.service /etc/systemd/system/
   sudo systemctl daemon-reload
+  # swap must be disabled for Kubelet
+  sudo swapoff -a
   sudo systemctl enable containerd cri-containerd kubelet kube-proxy
   sudo systemctl start containerd cri-containerd kubelet kube-proxy
 

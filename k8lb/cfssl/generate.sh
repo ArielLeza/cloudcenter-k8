@@ -28,9 +28,10 @@ generate() {
 
   #for each worker node
   for ((i=0; i<${#wkr_name[*]}; i++)); do
-  cat > ${wkr_name[i]}-csr.json <<EOF
+  local __HOSTNAME=$(echo ${wkr_name[i]} | cut -d'.' -f1)
+  cat > ${__HOSTNAME}-csr.json <<EOF
 {
-  "CN": "system:node:${wkr_name[i]}",
+  "CN": "system:node:${__HOSTNAME}",
   "key": {
     "algo": "rsa",
     "size": 2048
@@ -52,9 +53,9 @@ EOF
     -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
-    -hostname=${wkr_name[i]},${wkr_ip[i]} \
+    -hostname=${__HOSTNAME},${wkr_ip[i]} \
     -profile=kubernetes \
-    ${wkr_name[i]}-csr.json | cfssljson -bare ${wkr_name[i]}
+    ${__HOSTNAME}-csr.json | cfssljson -bare ${__HOSTNAME}
 
 done
 

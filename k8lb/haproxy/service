@@ -31,7 +31,7 @@ if [ ! -z $CUSTOM_REPO_URL ]; then
     haproxyPackages["RHEL"]="haproxy"
 fi
 cookiePrefix="LSW_WEB"
-serverPrefix="web"
+serverPrefix="manager"
 port=6443
 
 
@@ -80,7 +80,7 @@ installHaproxy() {
 
 generateHAProxyConfig() {
 	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg"
-  HEALTH_CHECK=" port 8080"
+  HEALTH_CHECK=" port 6443"
 	cp ${PROXY_DIR}/etc/haproxy.cfg $HAPROXY_CONFIG
 	chmod 0644 $HAPROXY_CONFIG
 
