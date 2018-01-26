@@ -91,6 +91,19 @@ downloadFile() {
   wget --tries=3 -q $__file
 }
 
+# Calculate AWS hostname from private IP address
+calcAwsHostnames() {
+  local __resultvar=$1
+  local __input=$2
+  local __output
+
+  for i in $(echo ${__input}|sed s/,/ /g); do
+    __output=ip-$(echo ${__input} | sed 's/\./-/g')
+  done
+
+  eval $__resultvar="'$__output'"
+}
+
 # Parse CloudCenter Userenv variables
 prepareEnvironment() {
 
@@ -124,19 +137,40 @@ prepareEnvironment() {
   IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP"
   #IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
 
-  if [ ! -z $CliqrTier_k8etcd_HOSTNAME ]; then
+  # Calculate hostname based on IP address for AWS, otherwise use userenv variable
+  if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
+    # Calc etcd names
+    for ((i=0; i<${#etcd_ip[*]}; i++)); do
+      local __AWSNAME="ip-$(echo ${etcd_ip[i]} | sed 's/\./-/g')"
+      etcd_name[$i]=${__AWSNAME}
+    done
+  elif [ ! -z $CliqrTier_k8etcd_HOSTNAME ]; then
     IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
   else
     log "[${TIER} ${CMD}] Error: CliqrTier_k8etcd_HOSTNAME undefined"
     exit 127
   fi
-  if [ ! -z $CliqrTier_k8worker_HOSTNAME ]; then
+
+  # Ditto workers
+  if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
+    for ((i=0; i<${#wkr_ip[*]}; i++)); do
+      local __AWSNAME="ip-$(echo ${wkr_ip[i]} | sed 's/\./-/g')"
+      wkr_name[$i]=${__AWSNAME}
+    done
+  elif [ ! -z $CliqrTier_k8worker_HOSTNAME ]; then
     IFS=',' read -a wkr_name <<< "$CliqrTier_k8worker_HOSTNAME"
   else
     log "[${TIER} ${CMD}] Error: CliqrTier_k8worker_HOSTNAME undefined"
     exit 127
   fi
-  if [ ! -z $CliqrTier_k8manager_HOSTNAME ]; then
+
+  # Ditto managers
+  if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
+    for ((i=0; i<${#mgr_ip[*]}; i++)); do
+      local __AWSNAME="ip-$(echo ${mgr_ip[i]} | sed 's/\./-/g')"
+      mgr_name[$i]=${__AWSNAME}
+    done
+  elif [ ! -z $CliqrTier_k8manager_HOSTNAME ]; then
     IFS=',' read -a mgr_name <<< "$CliqrTier_k8manager_HOSTNAME"
   else
     log "[${TIER} ${CMD}] Error: CliqrTier_k8manager_HOSTNAME undefined"
@@ -155,9 +189,9 @@ prepareEnvironment() {
   CLUSTER_CIDR="${K8ClusterNET}/${K8ClusterMASK}"
   CLUSTER_NAME="${ClusterName}"
 
-  local __HOSTNAME=$(echo ${cliqrNodeHostname} | cut -d'.' -f1)
-  sudo echo ${__HOSTNAME} > /etc/hostname
-  sudo hostname ${__HOSTNAME}
+  # local __HOSTNAME=$(echo ${cliqrNodeHostname} | cut -d'.' -f1)
+  # sudo echo ${__HOSTNAME} > /etc/hostname
+  # sudo hostname ${__HOSTNAME}
 
   export
 

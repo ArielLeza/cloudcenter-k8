@@ -45,7 +45,7 @@ install() {
   cd ~
   #for each worker node
   for ((i=0; i<${#wkr_name[*]}; i++)); do
-    local __HOSTNAME=$(echo ${wkr_name[i]} | cut -d'.' -f1)
+    local __HOSTNAME=${wkr_name[i]}
     kubectl config set-cluster ${ClusterName} \
       --certificate-authority=ca.pem \
       --embed-certs=true \
