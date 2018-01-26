@@ -197,6 +197,7 @@ prepareEnvironment() {
   # sudo hostname ${__HOSTNAME}
 
   if [ ${OSMOSIX_CLOUD} == 'vmware' ]; then
+    installSoft bind-utils
     sudo mv ${BASE_DIR}/util/dns-update.sh /etc/sysconfig/network-scripts
     sudo /etc/sysconfig/network-scripts/dns-update.sh
   fi
