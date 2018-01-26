@@ -13,8 +13,8 @@ install() {
   # Fetch certificates, configs, and token from LB node home directory
   retrieveFiles "${LB_ADDR}" ~ "ca.pem kube-proxy.kubeconfig ${__HOSTNAME}.pem ${__HOSTNAME}-key.pem ${__HOSTNAME}.kubeconfig"
 
-  POD_CIDR=$(echo $CLUSTER_CIDR | cut -d"." -f1-2)
-  POD_CIDR="${POD_CIDR}.${VM_NODE_INDEX}.0/24"
+  POD_CIDR_BASE=$(echo $CLUSTER_CIDR | cut -d"." -f1-2)
+  POD_CIDR="${POD_CIDR_BASE}.${VM_NODE_INDEX}.0/24"
 
   installSoft socat
 
@@ -65,9 +65,9 @@ EOF
 
   # Configure the Kubelet and Kube-Proxy
   sudo mv ~/ca.pem /var/lib/kubernetes/
-  sudo mv ~/${cliqrNodeHostname}.pem ~/${cliqrNodeHostname}-key.pem /var/lib/kubelet/
+  sudo mv ~/${__HOSTNAME}.pem ~/${__HOSTNAME}-key.pem /var/lib/kubelet/
   sudo mv ~/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
-  sudo mv ~/${cliqrNodeHostname}.kubeconfig /var/lib/kubelet/kubeconfig
+  sudo mv ~/${__HOSTNAME}.kubeconfig /var/lib/kubelet/kubeconfig
 
   # Configure kubelet service
   cat > kubelet.service <<EOF
@@ -94,8 +94,8 @@ ExecStart=/usr/local/bin/kubelet \\
   --pod-cidr=${POD_CIDR} \\
   --register-node=true \\
   --runtime-request-timeout=15m \\
-  --tls-cert-file=/var/lib/kubelet/${cliqrNodeHostname}.pem \\
-  --tls-private-key-file=/var/lib/kubelet/${cliqrNodeHostname}-key.pem \\
+  --tls-cert-file=/var/lib/kubelet/${__HOSTNAME}.pem \\
+  --tls-private-key-file=/var/lib/kubelet/${__HOSTNAME}-key.pem \\
   --v=2
 Restart=on-failure
 RestartSec=5
@@ -129,6 +129,14 @@ EOF
   sudo swapoff -a
   sudo systemctl enable containerd cri-containerd kubelet kube-proxy
   sudo systemctl start containerd cri-containerd kubelet kube-proxy
+
+  #for each worker node, install static routes for POD CIDRs
+  for ((i=0; i<${#wkr_ip[*]}; i++)); do
+    local __TARGET=${wkr_ip[i]}
+    if [ ${i} != ${VM_NODE_INDEX} ]; then
+      sudo route add -n ${POD_CIDR_BASE}.${VM_NODE_INDEX}.0 netmask 255.255.255.0 gw ${__TARGET}
+    fi
+  done
 
   ### VERIFY Worker
   # SSH Manager

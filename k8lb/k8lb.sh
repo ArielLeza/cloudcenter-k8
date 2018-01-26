@@ -49,7 +49,7 @@ install() {
     kubectl config set-cluster ${ClusterName} \
       --certificate-authority=ca.pem \
       --embed-certs=true \
-      --server=https://${K8_PUBLIC_ADDR}:6443 \
+      --server=https://${LB_ADDR}:6443 \
       --kubeconfig=${__HOSTNAME}.kubeconfig
 
     kubectl config set-credentials system:node:${__HOSTNAME} \
@@ -71,7 +71,7 @@ install() {
   kubectl config set-cluster ${ClusterName} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-    --server=https://${K8_PUBLIC_ADDR}:6443 \
+    --server=https://${LB_ADDR}:6443 \
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config set-credentials kube-proxy \
     --client-certificate=kube-proxy.pem \

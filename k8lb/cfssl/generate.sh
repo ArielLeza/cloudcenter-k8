@@ -63,10 +63,18 @@ done
     -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
-    -hostname=${SERVICE_RTR},${CliqrTier_k8manager_HOSTNAME},${MGR_ADDRS},${ETCD_ADDRS},${K8_PUBLIC_ADDR},127.0.0.1,kubernetes.default \
+    -hostname=${SERVICE_RTR},${MGR_ADDRS},${ETCD_ADDRS},${K8_PUBLIC_ADDR},${LB_ADDR},127.0.0.1,kubernetes.default \
     -profile=kubernetes \
     kubernetes-csr.json | cfssljson -bare kubernetes
 
-mv *.pem $1
+  # cfssl gencert \
+  #   -ca=ca.pem \
+  #   -ca-key=ca-key.pem \
+  #   -config=ca-config.json \
+  #   -hostname=${SERVICE_RTR},${CliqrTier_k8manager_HOSTNAME},${MGR_ADDRS},${ETCD_ADDRS},${K8_PUBLIC_ADDR},127.0.0.1,kubernetes.default \
+  #   -profile=kubernetes \
+  #   kubernetes-csr.json | cfssljson -bare kubernetes
+
+  mv *.pem $1
 
 }
