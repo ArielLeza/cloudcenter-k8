@@ -142,7 +142,8 @@ prepareEnvironment() {
     # Calc etcd names
     for ((i=0; i<${#etcd_ip[*]}; i++)); do
       local __AWSNAME="ip-$(echo ${etcd_ip[i]} | sed 's/\./-/g')"
-      etcd_name[$i]=${__AWSNAME}
+      etcd_name[${i}]=${__AWSNAME}
+      echo ${etcd_name[${i}]}
     done
   elif [ ! -z $CliqrTier_k8etcd_HOSTNAME ]; then
     IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
@@ -155,7 +156,8 @@ prepareEnvironment() {
   if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
     for ((i=0; i<${#wkr_ip[*]}; i++)); do
       local __AWSNAME="ip-$(echo ${wkr_ip[i]} | sed 's/\./-/g')"
-      wkr_name[$i]=${__AWSNAME}
+      wkr_name[${i}]=${__AWSNAME}
+      echo ${wkr_name[${i}]}
     done
   elif [ ! -z $CliqrTier_k8worker_HOSTNAME ]; then
     IFS=',' read -a wkr_name <<< "$CliqrTier_k8worker_HOSTNAME"
@@ -168,7 +170,8 @@ prepareEnvironment() {
   if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
     for ((i=0; i<${#mgr_ip[*]}; i++)); do
       local __AWSNAME="ip-$(echo ${mgr_ip[i]} | sed 's/\./-/g')"
-      mgr_name[$i]=${__AWSNAME}
+      mgr_name[${i}]=${__AWSNAME}
+      echo ${mgr_name[${i}]}
     done
   elif [ ! -z $CliqrTier_k8manager_HOSTNAME ]; then
     IFS=',' read -a mgr_name <<< "$CliqrTier_k8manager_HOSTNAME"
@@ -192,6 +195,11 @@ prepareEnvironment() {
   # local __HOSTNAME=$(echo ${cliqrNodeHostname} | cut -d'.' -f1)
   # sudo echo ${__HOSTNAME} > /etc/hostname
   # sudo hostname ${__HOSTNAME}
+
+  if [ ${OSMOSIX_CLOUD} == 'vmware' ]; then
+    sudo mv ${BASE_DIR}/util/dns-update.sh /etc/sysconfig/network-scripts
+    sudo /etc/sysconfig/network-scripts/dns-update.sh
+  fi
 
   export
 

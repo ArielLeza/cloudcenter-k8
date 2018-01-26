@@ -26,7 +26,8 @@ install() {
   # name is based on order in IP list, current etcd name is stored for later use.
 
   local __CLUSTER_LIST=""
-  local __HOSTNAME
+  local __HOSTNAME=$(hostname -s)
+  echo $__HOSTNAME
   count=${#etcd_ip[@]}
 
   index=0
@@ -42,9 +43,10 @@ install() {
   		__CLUSTER_LIST="${__CLUSTER_LIST},"
   	fi
   	echo __CLUSTER_LIST=$__CLUSTER_LIST
-    if [ "$index" -eq ${VM_NODE_INDEX}]; then
-      __HOSTNAME=${etcd_name[$index]}
-    fi
+
+    # if [ "$index" -eq "${VM_NODE_INDEX}" ]; then
+    #   __HOSTNAME=${etcd_name[$index]}
+    # fi
   done
 
   cat > etcd.service <<EOF
