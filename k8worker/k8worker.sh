@@ -134,7 +134,7 @@ EOF
   for ((i=0; i<${#wkr_ip[*]}; i++)); do
     local __TARGET=${wkr_ip[i]}
     if [ ${i} != ${VM_NODE_INDEX} ]; then
-      sudo route add -n ${POD_CIDR_BASE}.${VM_NODE_INDEX}.0 netmask 255.255.255.0 gw ${__TARGET}
+      sudo route add -net ${POD_CIDR_BASE}.${VM_NODE_INDEX}.0 netmask 255.255.255.0 gw ${__TARGET}
     fi
   done
 
