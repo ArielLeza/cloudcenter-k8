@@ -26,6 +26,7 @@ install() {
   # name is based on order in IP list, current etcd name is stored for later use.
 
   local __CLUSTER_LIST=""
+  local __HOSTNAME
   count=${#etcd_ip[@]}
 
   index=0
@@ -41,6 +42,9 @@ install() {
   		__CLUSTER_LIST="${__CLUSTER_LIST},"
   	fi
   	echo __CLUSTER_LIST=$__CLUSTER_LIST
+    if [ "$index" -eq ${VM_NODE_INDEX}]; then
+      __HOSTNAME=${etcd_name[$index]}
+    fi
   done
 
   cat > etcd.service <<EOF
@@ -50,7 +54,7 @@ install() {
 
   [Service]
   ExecStart=/usr/local/bin/etcd \\
-    --name ${cliqrNodeHostname} \\
+    --name ${__HOSTNAME} \\
     --cert-file=/etc/etcd/kubernetes.pem \\
     --key-file=/etc/etcd/kubernetes-key.pem \\
     --peer-cert-file=/etc/etcd/kubernetes.pem \\
