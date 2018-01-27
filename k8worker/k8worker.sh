@@ -133,13 +133,15 @@ EOF
   #for each worker node, install static routes for POD CIDRs
   for ((i=0; i<${#wkr_ip[*]}; i++)); do
     local __TARGET=${wkr_ip[i]}
+    local __OCTET=$(expr ${i} + 1)
     if [ ${i} -ne $( expr ${VM_NODE_INDEX} - 1) ]; then
-      sudo route add -net ${POD_CIDR_BASE}.${VM_NODE_INDEX}.0 netmask 255.255.255.0 gw ${__TARGET}
+      sudo route add -net ${POD_CIDR_BASE}.${__OCTET}.0 netmask 255.255.255.0 gw ${__TARGET}
     fi
   done
 
-  ### VERIFY Worker
-  # SSH Manager
-  # kubectl get nodes | grep ${cliqrNodeHostname}
+  if [ "$VM_NODE_INDEX" -eq "1" ]; then
+  ### VERIFY Worker count and load K8 DNS
+  executeRemote ${mgr_ip[0]} ${BASE_DIR}/k8manager/k8dns.sh ${numClusterNodes} ${numClusterNodes} ${BASE_DIR}/k8manager/kube-dns.yaml
+  fi
 
 }

@@ -42,6 +42,20 @@ retrieveFiles() {
   fi
 }
 
+# Retrieve files from other node
+executeRemote() {
+  local __target=$1
+  local __cmd=$2
+  shift;shift
+
+  if [ ! -z "$__target" ]; then
+      ssh -o StrictHostKeyChecking=no ${__target} ${__cmd} $@
+  else
+    log "[${TIER} ${CMD} executeRemote()] Error: target host undefined"
+    exit 127
+  fi
+}
+
 # CLUSTER_CIDRm to other nodes
 pushFiles() {
   local __targets=$1
@@ -53,34 +67,6 @@ pushFiles() {
       scp -o StrictHostKeyChecking=no ${__path}/${i} ${j}:${__path}/.
     done
   done
-}
-
-# Run command on other nodes
-runRemoteCommand() {
-  local __target=$1
-  local __output=$2
-  local __cmd=$3
-
-  ssh -o StrictHostKeyChecking=no -c "${__cmd}"
-}
-
-# Approve TLS certs on remote Controller
-approveTlsCerts() {
-  local __target=$1
-  local __nodes=$2
-  local __timeout=$3
-
-  local __count=0
-  while [ ${__count} -lt ${__timeout} ]; do
-    __cmdoutput=""
-    runRemoteCommand ${__target} __cmdoutput 'kubectl get csr'
-
-    echo $__cmdoutput
-
-    let "__count++"
-    sleep 60
-  done
-
 }
 
 # Standard get for external files
