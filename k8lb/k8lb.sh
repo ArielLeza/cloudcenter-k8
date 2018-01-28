@@ -71,7 +71,7 @@ install() {
   kubectl config set-cluster ${ClusterName} \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-    --server=https://${LB_ADDR}:6443 \
+    --server=https://${K8_PUBLIC_ADDR}:6443 \
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config set-credentials kube-proxy \
     --client-certificate=kube-proxy.pem \
@@ -89,20 +89,20 @@ kubectl config set-cluster ${ClusterName} \
   --certificate-authority=ca.pem \
   --embed-certs=true \
   --server=https://${LB_ADDR}:6443 \
-  --kubeconfig=admin.kubeconfig
+  --kubeconfig=${ClusterName}-admin.kubeconfig
 
 kubectl config set-credentials admin \
-  --client-certificate=admin.pem \
-  --client-key=admin-key.pem \
+  --client-certificate=${ClusterName}-admin.pem \
+  --client-key=${ClusterName}-admin-key.pem \
   --embed-certs=true \
-  --kubeconfig=admin.kubeconfig
+  --kubeconfig=${ClusterName}-admin.kubeconfig
 
 kubectl config set-context ${ClusterName} \
   --cluster=${ClusterName} \
-  --user=admin \
-  --kubeconfig=admin.kubeconfig
+  --user=${ClusterName}-admin \
+  --kubeconfig=${ClusterName}-admin.kubeconfig
 
-kubectl config use-context ${ClusterName} --kubeconfig=admin.kubeconfig
+kubectl config use-context ${ClusterName} --kubeconfig=${ClusterName}-admin.kubeconfig
 
   # Seed Encryption
   ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
