@@ -84,7 +84,25 @@ install() {
     --kubeconfig=kube-proxy.kubeconfig
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
-  # mv *.kubeconfig ~
+  # Generate admin kubeconfig
+kubectl config set-cluster ${ClusterName} \
+  --certificate-authority=ca.pem \
+  --embed-certs=true \
+  --server=https://${LB_ADDR}:6443 \
+  --kubeconfig=admin.kubeconfig
+
+kubectl config set-credentials admin \
+  --client-certificate=admin.pem \
+  --client-key=admin-key.pem \
+  --embed-certs=true \
+  --kubeconfig=admin.kubeconfig
+
+kubectl config set-context ${ClusterName} \
+  --cluster=${ClusterName} \
+  --user=admin \
+  --kubeconfig=admin.kubeconfig
+
+kubectl config use-context ${ClusterName} --kubeconfig=admin.kubeconfig
 
   # Seed Encryption
   ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
