@@ -13,7 +13,7 @@ install() {
   #source ${WD}/service
   sudo ${WD}/service install
   # installHaproxy
-  sudo ${WD}/service configure "$MGR_ADDRS"
+  sudo ${WD}/service configure "$MGR_ADDRS" "$WKR_ADDRS"
   #generateHAProxyConfig
   sudo ${WD}/service start
   #startHAProxyService

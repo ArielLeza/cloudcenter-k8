@@ -13,7 +13,8 @@ OSSVC_HOME=/usr/local/osmosix/service
 set -x
 
 cmd=$1
-serverIPs="$2"
+managerIPs="$2"
+workerIPs="$3"
 SVCNAME="haproxy"
 SVCHOME="$OSSVC_HOME/$SVCNAME"
 USER_ENV="/usr/local/osmosix/etc/userenv"
@@ -31,8 +32,10 @@ if [ ! -z $CUSTOM_REPO_URL ]; then
     haproxyPackages["RHEL"]="haproxy"
 fi
 cookiePrefix="LSW_WEB"
-serverPrefix="manager"
-port=6443
+managerPrefix="manager"
+workerPrefix="worker"
+mgr_port=6443
+wkr_port=6443
 
 
 installHaproxy() {
@@ -80,7 +83,8 @@ installHaproxy() {
 
 generateHAProxyConfig() {
 	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg"
-  HEALTH_CHECK=" port 6443"
+  MGR_HEALTH_CHECK=" port 6443"
+  WKR_HEALTH_CHECK=" port 80"
 	cp ${PROXY_DIR}/etc/haproxy.cfg $HAPROXY_CONFIG
 	chmod 0644 $HAPROXY_CONFIG
 
@@ -99,30 +103,50 @@ generateHAProxyConfig() {
 		source "$USER_ENV"
 	fi
 
-  #serverIPs="$MGR_ADDRS"
-
-
-	if [ ! -z "$serverIPs" ]; then
-		local serverDefs=""
+	if [ ! -z "$managerIPs" ]; then
+		local managerDefs=""
 		local count=0
 
-		for ip in `echo $serverIPs|tr ',' ' '`
+		for ip in `echo $managerIPs|tr ',' ' '`
 		do
 			count=$(( count+1 ))
 			log "[CONFIGURATION] Adding $ip "
-			newLine="server $serverPrefix$count $ip:$port check $HEALTH_CHECK"
-			if [ ! -z "$serverDefs" ]; then
-				serverDefs="$serverDefs\n\t$newLine"
+			newLine="server $managerPrefix$count $ip:$mgr_port check $MGR_HEALTH_CHECK"
+			if [ ! -z "$managerDefs" ]; then
+				managerDefs="$managerDefs\n\t$newLine"
 			else
-				serverDefs="$newLine"
+				managerDefs="$newLine"
 			fi
 		done
-		replaceToken $HAPROXY_CONFIG "%SERVER_DEFS%" "$serverDefs"
+		replaceToken $HAPROXY_CONFIG "%MANAGER_DEFS%" "$managerDefs"
 	else
 
-		log "[CONFIGURATION] Missing ip addresses of web tier"
+		log "[CONFIGURATION] Missing ip addresses of manager tier"
 		exit 1;
 	fi
+
+	if [ ! -z "$workerIPs" ]; then
+		local workerDefs=""
+		local count=0
+
+		for ip in `echo $workerIPs|tr ',' ' '`
+		do
+			count=$(( count+1 ))
+			log "[CONFIGURATION] Adding $ip "
+			newLine="server $workerPrefix$count $ip:$wkr_port check $WKR_HEALTH_CHECK"
+			if [ ! -z "$workerDefs" ]; then
+				workerDefs="$workerDefs\n\t$newLine"
+			else
+				workerDefs="$newLine"
+			fi
+		done
+		replaceToken $HAPROXY_CONFIG "%WORKER_DEFS%" "$workerDefs"
+	else
+
+		log "[CONFIGURATION] Missing ip addresses of worker tier"
+		exit 1;
+	fi
+
 	#TODO: Add support for https once haproxy supports
 }
 

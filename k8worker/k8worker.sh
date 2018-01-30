@@ -69,6 +69,11 @@ EOF
   sudo mv ~/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
   sudo mv ~/${__HOSTNAME}.kubeconfig /var/lib/kubelet/kubeconfig
 
+#  --hostname-override=${__HOSTNAME} \\
+  if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
+    __CLOUD_PROVIDER='  --cloud-provider=aws '
+  fi
+
   # Configure kubelet service
   cat > kubelet.service <<EOF
 [Unit]
@@ -79,12 +84,11 @@ Requires=cri-containerd.service
 
 [Service]
 ExecStart=/usr/local/bin/kubelet \\
-  --hostname-override=${__HOSTNAME} \
   --allow-privileged=true \\
   --anonymous-auth=false \\
   --authorization-mode=Webhook \\
   --client-ca-file=/var/lib/kubernetes/ca.pem \\
-  --cloud-provider= \\
+${__CLOUD_PROVIDER} \\
   --cluster-dns=10.32.0.10 \\
   --cluster-domain=cluster.local \\
   --container-runtime=remote \\
