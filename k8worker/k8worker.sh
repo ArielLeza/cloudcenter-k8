@@ -79,6 +79,7 @@ Requires=cri-containerd.service
 
 [Service]
 ExecStart=/usr/local/bin/kubelet \\
+  --hostname-override=${__HOSTNAME} \
   --allow-privileged=true \\
   --anonymous-auth=false \\
   --authorization-mode=Webhook \\
