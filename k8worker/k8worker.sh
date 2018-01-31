@@ -9,7 +9,7 @@ install() {
 
   log 'BEGIN K8WORKER'
 
-  local __HOSTNAME=$(hostname -s)
+  local __HOSTNAME=$(wkr_name[$(expr $VM_NODE_INDEX - 1)])
   # Fetch certificates, configs, and token from LB node home directory
   retrieveFiles "${LB_ADDR}" ~ "ca.pem kube-proxy.kubeconfig ${__HOSTNAME}.pem ${__HOSTNAME}-key.pem ${__HOSTNAME}.kubeconfig"
 
@@ -69,11 +69,6 @@ EOF
   sudo mv ~/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
   sudo mv ~/${__HOSTNAME}.kubeconfig /var/lib/kubelet/kubeconfig
 
-#  --hostname-override=${__HOSTNAME} \\
-  if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
-    __CLOUD_PROVIDER='  --cloud-provider=aws '
-  fi
-
   # Configure kubelet service
   cat > kubelet.service <<EOF
 [Unit]
@@ -88,7 +83,6 @@ ExecStart=/usr/local/bin/kubelet \\
   --anonymous-auth=false \\
   --authorization-mode=Webhook \\
   --client-ca-file=/var/lib/kubernetes/ca.pem \\
-${__CLOUD_PROVIDER} \\
   --cluster-dns=10.32.0.10 \\
   --cluster-domain=cluster.local \\
   --container-runtime=remote \\
@@ -146,7 +140,7 @@ EOF
 
   if [ "$VM_NODE_INDEX" -eq "1" ]; then
   ### VERIFY Worker count and load K8 DNS
-  executeRemote ${mgr_ip[0]} ${BASE_DIR}/k8manager/k8dns.sh ${numClusterNodes} ${numClusterNodes} ${BASE_DIR}/k8manager/kube-dns.yaml
+  executeRemote ${mgr_ip[0]} ${BASE_DIR}/k8manager/k8dns.sh ${numClusterNodes} $(expr ${numClusterNodes} + 1) ${BASE_DIR}/k8manager/kube-dns.yaml
   fi
 
 }

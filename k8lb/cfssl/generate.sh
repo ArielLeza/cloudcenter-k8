@@ -13,7 +13,7 @@ generate() {
 
   cat > ${ClusterName}-admin-csr.json <<EOF
 {
-  "CN": "${ClusterName}-admin",
+  "CN": "admin",
   "key": {
     "algo": "rsa",
     "size": 2048
@@ -35,7 +35,7 @@ EOF
     -ca-key=ca-key.pem \
     -config=ca-config.json \
     -profile=kubernetes \
-    ${ClusterName}-admin-csr.json | cfssljson -bare ${ClusterName}-admin
+    admin-csr.json | cfssljson -bare admin
 
   cfssl gencert \
     -ca=ca.pem \

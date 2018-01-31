@@ -123,11 +123,15 @@ prepareEnvironment() {
   IFS=',' read -a etcd_ip <<< "$__K8_ETCD_IP"
   #IFS=',' read -a etcd_name <<< "$CliqrTier_k8etcd_HOSTNAME"
 
+  #Determine DNS suffix
+  __DNS_SUFFIX=$(hostname -f | cut -d'.' -f2-)
+
   # Calculate hostname based on IP address for AWS, otherwise use userenv variable
   if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
     # Calc etcd names
     for ((i=0; i<${#etcd_ip[*]}; i++)); do
       local __AWSNAME="ip-$(echo ${etcd_ip[i]} | sed 's/\./-/g')"
+      __AWSNAME="${__AWSNAME}.${__DNS_SUFFIX}"
       etcd_name[${i}]=${__AWSNAME}
       echo ${etcd_name[${i}]}
     done
@@ -142,6 +146,7 @@ prepareEnvironment() {
   if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
     for ((i=0; i<${#wkr_ip[*]}; i++)); do
       local __AWSNAME="ip-$(echo ${wkr_ip[i]} | sed 's/\./-/g')"
+      __AWSNAME="${__AWSNAME}.${__DNS_SUFFIX}"
       wkr_name[${i}]=${__AWSNAME}
       echo ${wkr_name[${i}]}
     done
@@ -156,6 +161,7 @@ prepareEnvironment() {
   if [ ${OSMOSIX_CLOUD} == 'amazon' ]; then
     for ((i=0; i<${#mgr_ip[*]}; i++)); do
       local __AWSNAME="ip-$(echo ${mgr_ip[i]} | sed 's/\./-/g')"
+      __AWSNAME="${__AWSNAME}.${__DNS_SUFFIX}"
       mgr_name[${i}]=${__AWSNAME}
       echo ${mgr_name[${i}]}
     done

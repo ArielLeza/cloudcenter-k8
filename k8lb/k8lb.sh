@@ -92,14 +92,14 @@ kubectl config set-cluster ${ClusterName} \
   --kubeconfig=${ClusterName}-admin.kubeconfig
 
 kubectl config set-credentials admin \
-  --client-certificate=${ClusterName}-admin.pem \
-  --client-key=${ClusterName}-admin-key.pem \
+  --client-certificate=admin.pem \
+  --client-key=admin-key.pem \
   --embed-certs=true \
   --kubeconfig=${ClusterName}-admin.kubeconfig
 
 kubectl config set-context ${ClusterName} \
   --cluster=${ClusterName} \
-  --user=${ClusterName}-admin \
+  --user=admin \
   --kubeconfig=${ClusterName}-admin.kubeconfig
 
 kubectl config use-context ${ClusterName} --kubeconfig=${ClusterName}-admin.kubeconfig
