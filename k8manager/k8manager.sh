@@ -45,7 +45,7 @@ install() {
 
   [Service]
   ExecStart=/usr/local/bin/kube-apiserver \\
-    --admission-control=Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
+    --admission-control=Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
     --advertise-address=${OSMOSIX_PRIVATE_IP} \\
     --allow-privileged=true \\
     --apiserver-count=3 \\

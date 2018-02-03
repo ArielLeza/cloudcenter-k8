@@ -9,7 +9,7 @@ install() {
 
   log 'BEGIN K8WORKER'
 
-  local __HOSTNAME=$(wkr_name[$(expr $VM_NODE_INDEX - 1)])
+  local __HOSTNAME=${wkr_name[$(expr $VM_NODE_INDEX - 1)]}
   # Fetch certificates, configs, and token from LB node home directory
   retrieveFiles "${LB_ADDR}" ~ "ca.pem kube-proxy.kubeconfig ${__HOSTNAME}.pem ${__HOSTNAME}-key.pem ${__HOSTNAME}.kubeconfig"
 

@@ -26,7 +26,7 @@ install() {
   # name is based on order in IP list, current etcd name is stored for later use.
 
   local __CLUSTER_LIST=""
-  local __HOSTNAME=$(etcd_name[$(expr $VM_NODE_INDEX - 1)])
+  local __HOSTNAME=${etcd_name[$(expr $VM_NODE_INDEX - 1)]}
   echo $__HOSTNAME
   count=${#etcd_ip[@]}
 
